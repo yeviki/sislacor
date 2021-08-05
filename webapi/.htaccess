@@ -1,0 +1,28 @@
+<IfModule mod_rewrite.c>
+
+RewriteEngine On
+RewriteBase /sipelacor/webapi
+
+#RewriteCond %{HTTPS} off
+#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
+
+RewriteCond %{REQUEST_URI} ^system.*
+RewriteRule ^(.*)$ /index.php/$1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteCond $1 !^(index\.php|images|robots\.txt|css|docs|js|system)
+RewriteRule ^(.*)$ index.php/$1 [L]
+
+Options All -Indexes
+
+LimitRequestBody 5120000
+
+</IfModule>
+
+<files .htaccess>
+order allow,deny
+
+deny from all
+</files>

@@ -1,0 +1,5 @@
+[21-Apr-2020 08:25:51 Asia/Jakarta] PHP Fatal error:  Call to undefined method Model_master::getDataRegency() in /home/cobalagi/public_html/sipelacor/application/modules/otg/controllers/Otg.php on line 35
+[20-Oct-2020 09:28:17 Asia/Jakarta] PHP Fatal error:  Class 'notification_manager' not found in /home/cobalagi/public_html/sipelacor/application/modules/konfirmasi_kasus/models/Model_pasien.php on line 435
+[20-Oct-2020 09:46:37 Asia/Jakarta] PHP Fatal error:  Class 'notification_manager' not found in /home/cobalagi/public_html/sipelacor/application/modules/konfirmasi_kasus/models/Model_pasien.php on line 435
+[22-Oct-2020 16:29:28 Asia/Jakarta] PHP Fatal error:  Class 'notification_manager' not found in /home/cobalagi/public_html/sipelacor/application/modules/konfirmasi_kasus/models/Model_pasien.php on line 435
+[23-Oct-2020 09:32:06 Asia/Jakarta] PHP Fatal error:  Class 'notification_manager' not found in /home/cobalagi/public_html/sipelacor/application/modules/konfirmasi_kasus/models/Model_pasien.php on line 435

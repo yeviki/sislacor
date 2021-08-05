@@ -1,0 +1,1 @@
+[21-Apr-2020 10:03:06 Asia/Jakarta] PHP Parse error:  syntax error, unexpected 'dbdriver' (T_STRING), expecting ')' in /home/cobalagi/public_html/sipelacor/webapi/application/config/database.php on line 82
