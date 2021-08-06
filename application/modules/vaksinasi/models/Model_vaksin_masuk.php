@@ -17,8 +17,9 @@ class Model_vaksin_masuk extends CI_Model
 	public function validasiDataValue()
 	{
 		$this->form_validation->set_rules('total_stok', 'Total Stok', 'required|trim');
-		$this->form_validation->set_rules('id_penyalur', 'Penyalur', 'required|trim');
-		$this->form_validation->set_rules('tanggal', 'Tanggal Masuk', 'required|trim');
+		$this->form_validation->set_rules('jenis_vaksin', 'Jenis Vaksin', 'required|trim');
+		$this->form_validation->set_rules('penyalur', 'Penyalur', 'required|trim');
+		$this->form_validation->set_rules('tanggal_masuk', 'Tanggal Masuk', 'required|trim');
   		validation_message_setting();
 		if ($this->form_validation->run() == FALSE)
 			return false;
@@ -26,37 +27,46 @@ class Model_vaksin_masuk extends CI_Model
 			return true;
 	}
 
-	var $search = array('total_stok', 'nm_kondisi', 'tanggal');
+	var $search = array('id_penyalur', 'id_jenis_vaksin', 'tanggal');
 	public function get_datatables($param)
-  {
-    $this->_get_datatables_query($param);
-    if($_POST['length'] != -1)
-        $this->db->limit($_POST['length'], $_POST['start']);
-    $query = $this->db->get();
-    return $query->result_array();
-  }
+	{
+		$this->_get_datatables_query($param);
+		if($_POST['length'] != -1)
+			$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
 
-	public function count_filtered($param)
-  {
-    $this->_get_datatables_query($param);
-    $query = $this->db->get();
-    return $query->num_rows();
-  }
+		public function count_filtered($param)
+	{
+		$this->_get_datatables_query($param);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
 
-  public function count_all()
-  {
-	$this->db->select('a.id_stok_masuk,
-							a.total_stok,
-							a.id_penyalur,
-							a.tanggal,
-							b.nm_penyalur
-							');
-	$this->db->join('ref_penyalur b', 'b.id_penyalur = a.id_penyalur', 'inner');
-    return $this->db->count_all_results('ta_vaksin_masuk a');
-  }
+	public function count_all()
+	{
+		$this->db->select('a.id_stok_masuk,
+								a.total_stok,
+								a.id_jenis_vaksin,
+								a.id_penyalur,
+								a.tanggal,
+								a.create_by,
+								a.create_date,
+								a.create_ip,
+								a.mod_by,
+								a.mod_date,
+								a.mod_ip,
+								b.nm_vaksin,
+								c.nm_penyalur
+								');
+		$this->db->join('ref_jenis_vaksin b', 'b.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
+		$this->db->join('ref_penyalur c', 'c.id_penyalur = a.id_penyalur', 'inner');
+		return $this->db->count_all_results('ta_vaksin_masuk a');
+	}
 
-  private function _get_datatables_query($param)
-  {
+	private function _get_datatables_query($param)
+	{
 		$post = array();
 		if (is_array($param)) {
 			foreach ($param as $v) {
@@ -65,21 +75,25 @@ class Model_vaksin_masuk extends CI_Model
 		}
 		$this->db->select('a.id_stok_masuk,
 							a.total_stok,
+							a.id_jenis_vaksin,
 							a.id_penyalur,
 							a.tanggal,
-							b.nm_penyalur
+							b.nm_vaksin,
+							c.nm_penyalur
 							');
 		$this->db->from('ta_vaksin_masuk a');
-		$this->db->join('ref_penyalur b', 'b.id_penyalur = a.id_penyalur', 'inner');
+		$this->db->join('ref_jenis_vaksin b', 'b.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
+		$this->db->join('ref_penyalur c', 'c.id_penyalur = a.id_penyalur', 'inner');
 		
 		// Penyalur Vaksin
 		if(isset($post['penyalur']) AND $post['penyalur'] != '')
 			$this->db->where('a.id_penyalur', $post['penyalur']);
+		// Jenis Vaksin
+		if(isset($post['jenis_vaksin']) AND $post['jenis_vaksin'] != '')
+			$this->db->where('a.id_jenis_vaksin', $post['jenis_vaksin']);
 		// Tanggal Masuk
-        if(isset($post['start_date']) AND $post['start_date'] != ''){
-            // $arrDate = explode(' - ', $post['tgl_range']);
-			// $this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y") BETWEEN "'.$arrDate[0].'"  AND "'.$arrDate[1].'"', NULL, FALSE);
-			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y"), $post['end_date'].'"', NULL, FALSE);
+        if(isset($post['tanggal']) AND $post['tanggal'] != ''){
+			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y")', $post['tanggal']);
 		}
 		
 		$i = 0;
@@ -98,126 +112,30 @@ class Model_vaksin_masuk extends CI_Model
 		$i++;
 		}
 		$this->db->order_by('a.tanggal DESC');
-		$this->db->order_by('a.id_timbangan DESC');
-  }
+		$this->db->order_by('a.id_stok_masuk DESC');
+  	}
 
-	public function getDataListTimbanganReport($lokasi, $suplier, $tanggal)
+	public function getDataDetail($id_stok_masuk)
 	{
-		$arrDate = explode(' - ', $tanggal);
-        $this->db->select('a.id_timbangan,
-							a.token,
-							a.id_master_truck,
-							a.id_pemasok,
-							a.id_master_tpa,
-							a.total_stok,
-							a.no_tiket,
-							a.jam_masuk,
-							a.jam_keluar,
-							a.berat_masuk,
-							a.berat_keluar,
-							a.berat_bersih,
-							a.id_penyalur,
-							a.tanggal,
-							a.biaya,
-							a.flag,
-							b.nm_kondisi,
-							c.plat_no,
-							d.lokasi_tpa,
-							d.nama_tpa,
-							e.id_regency,
-							f.name
-							');
-        $this->db->from('ms_timbangan a');
-        $this->db->join('wa_kondisi b', 'a.id_penyalur = b.id_penyalur', 'inner');
-        $this->db->join('master_truck c', 'a.id_master_truck = c.id_master_truck', 'inner');
-        $this->db->join('master_tpa d', 'c.id_master_tpa = d.id_master_tpa', 'inner');
-        $this->db->join('tb_pemasok e', 'e.id_pemasok = a.id_pemasok', 'inner');
-        $this->db->join('wa_regency f', 'f.id = e.id_regency', 'inner');
-		$this->db->where('a.flag', 2);
-		if($this->app_loader->is_tpa() OR $this->app_loader->is_petugas()) {
-			$this->db->where('a.id_master_tpa', $this->app_loader->current_tpa());
-		}
-		if($lokasi != '')
-			$this->db->where('a.id_master_tpa', $lokasi);
-		if($suplier != '')
-			$this->db->where('a.id_pemasok', $suplier);
-		if($tanggal != '')
-			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y") BETWEEN "'.$arrDate[0].'"  AND "'.$arrDate[1].'"');
-		$this->db->order_by('a.id_timbangan ASC');
-
-		$query = $this->db->get();
-    	return $query->result_array();
-	}
-
-	public function getDataDetailTMB($id_timbangan)
-	{
-		$this->db->where('id_timbangan', $id_timbangan);
-		$query = $this->db->get('ms_timbangan');
+		$this->db->where('id_stok_masuk', $id_stok_masuk);
+		$query = $this->db->get('ta_vaksin_masuk');
 		return $query->row_array();
 	}
 
-	private function getToken($param1, $param2) {
-
-		$token = generateToken($param1, $param2);
-
-		//Cek Token yang sudah ada atau belum
-		$this->db->where('token', $token);
-		$count = $this->db->count_all_results('ms_timbangan');
-
-		if($count > 0)
-			$this->getToken($param1, $param2);
-		else
-			return $token;
-	}
-
-	//Menampilkan kode report pemeriksaan
-	public function getTiket()
-	{	
-		$year = date('Y');
-		$sql2 = "SELECT count(id_timbangan) AS tiket FROM ms_timbangan WHERE tahun = '$year'";
-		$no_tiket = $this->db->query($sql2, array());
-		return $no_tiket->row_array();
-	}
-
-	public function insertDataTMB()
+	public function insertData()
 	{
 		$create_by    		= $this->app_loader->current_account();
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
 
-		$month  		= date('m');
-		$year  			= date('Y');
-		$data_tiket 	= $this->getTiket();
+		$tanggal			= date_convert(escape($this->input->post('tanggal_masuk', TRUE)));
 
-		$noTiket 		= ($data_tiket['tiket']+1).'/'.bulan_romawi($month).'/'.$year;
-		$nmSupir 		= escape($this->input->post('total_stok', TRUE));
-
-		$token			= $this->getToken($nmSupir, $noTiket);
-
-		//cek data
-		$this->db->where('no_tiket', $noTiket);
-		$qTot = $this->db->count_all_results('ms_timbangan');
-		if($qTot > 0)
-			return array('message'=>'ERROR', 'kode'=>$noTiket);
-		else {
 			$data = array(
-				'token'				=> $token,
-				'no_tiket'			=> $noTiket,
-				'total_stok'			=> escape($this->input->post('total_stok', TRUE)),
-				'jam_masuk'			=> $create_time_now,
-				'jam_keluar'		=> '',
-				'berat_masuk'		=> escape($this->input->post('berat_masuk', TRUE)),
-				'berat_keluar'		=> escape($this->input->post('berat_keluar', TRUE)),
-				'berat_bersih'		=> escape($this->input->post('berat_bersih', TRUE)),
-				'biaya'				=> escape($this->input->post('biaya', TRUE)),
-				'id_penyalur'		=> escape($this->input->post('id_penyalur', TRUE)),
-				'id_master_tpa'		=> escape($this->input->post('tpa', TRUE)),
-				'id_pemasok'		=> escape($this->input->post('pemasok', TRUE)),
-				'id_master_truck'	=> escape($this->input->post('truck', TRUE)),
-				'tanggal'			=> date_convert(escape($this->input->post('tanggal', TRUE))),
-				'tahun'				=> $year,
-				'flag'				=> '1',
+				'tanggal'			=> $tanggal,
+				'total_stok'		=> escape($this->input->post('total_stok', TRUE)),
+				'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
+				'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),
 				'create_by'			=> $create_by,
 				'create_date'		=> $create_date,
 				'create_ip'			=> $create_ip,
@@ -225,110 +143,45 @@ class Model_vaksin_masuk extends CI_Model
 				'mod_date'			=> $create_date,
 				'mod_ip'			=> $create_ip
 			);
-			$this->db->insert('ms_timbangan', $data);
-			return array('message'=>'SUCCESS', 'kode'=>$noTiket);
-		}
+			$this->db->insert('ta_vaksin_masuk', $data);
+			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
 	}
 
-	public function updateDataTMB()
+	public function updateData()
 	{
 		$create_by    		= $this->app_loader->current_account();
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
-		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
-		$id_timbangan		= $this->encryption->decrypt(escape($this->input->post('timbanganId', TRUE)));
-		//cek data rs by id
-		$dataTPA 	= $this->getDataDetailTMB($id_timbangan);
-		$tiket  	= !empty($dataTPA) ? $dataTPA['no_tiket'] : '';
-		$flag  		= !empty($dataTPA) ? $dataTPA['flag'] : '';
-		if(count($dataTPA) <= 0)
-			return array('message'=>'ERROR', 'kode'=>$tiket);
+		$id_stok_masuk		= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+
+		//cek data
+		$dataVaksin 	= $this->getDataDetail($id_stok_masuk);
+		$tanggal  	= !empty($dataVaksin) ? $dataVaksin['tanggal'] : '';
+		if(count($dataVaksin) <= 0)
+			return array('message'=>'ERROR', 'tanggal'=>$tanggal);
 		else {
-				if ($flag == 1) {
-					$data = array(
-						'total_stok'			=> escape($this->input->post('total_stok', TRUE)),
-						'jam_keluar'		=> $create_time_now,
-						'berat_masuk'		=> escape($this->input->post('berat_masuk', TRUE)),
-						'berat_keluar'		=> escape($this->input->post('berat_keluar', TRUE)),
-						'berat_bersih'		=> escape($this->input->post('berat_bersih', TRUE)),
-						'biaya'				=> escape($this->input->post('biaya', TRUE)),
-						'id_penyalur'		=> escape($this->input->post('id_penyalur', TRUE)),
-						'id_master_tpa'		=> escape($this->input->post('tpa', TRUE)),
-						'id_pemasok'		=> escape($this->input->post('pemasok', TRUE)),
-						'id_master_truck'	=> escape($this->input->post('truck', TRUE)),
-						'tanggal'			=> date_convert(escape($this->input->post('tanggal', TRUE))),
-						'flag'				=> '2',
-						'mod_by'			=> $create_by,
-						'mod_date'			=> $create_date,
-						'mod_ip'			=> $create_ip
-					);
-				} else {
-					$data = array(
-						'total_stok'			=> escape($this->input->post('total_stok', TRUE)),
-						'berat_masuk'		=> escape($this->input->post('berat_masuk', TRUE)),
-						'berat_keluar'		=> escape($this->input->post('berat_keluar', TRUE)),
-						'berat_bersih'		=> escape($this->input->post('berat_bersih', TRUE)),
-						'biaya'				=> escape($this->input->post('biaya', TRUE)),
-						'id_penyalur'		=> escape($this->input->post('id_penyalur', TRUE)),
-						'id_master_tpa'		=> escape($this->input->post('tpa', TRUE)),
-						'id_pemasok'		=> escape($this->input->post('pemasok', TRUE)),
-						'id_master_truck'	=> escape($this->input->post('truck', TRUE)),
-						'tanggal'			=> date_convert(escape($this->input->post('tanggal', TRUE))),
-						'mod_by'			=> $create_by,
-						'mod_date'			=> $create_date,
-						'mod_ip'			=> $create_ip
-					);
-				}
-				$this->db->where('id_timbangan', $id_timbangan);
-				$this->db->update('ms_timbangan', $data);
-				return array('message'=>'SUCCESS', 'kode'=>$tiket);
+				$data = array(
+					'tanggal'			=> $tanggal,
+					'total_stok'		=> escape($this->input->post('total_stok', TRUE)),
+					'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
+					'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),
+					'mod_by'			=> $create_by,
+					'mod_date'			=> $create_date,
+					'mod_ip'			=> $create_ip
+				);
+			$this->db->where('id_stok_masuk', $id_stok_masuk);
+			$this->db->update('ta_vaksin_masuk', $data);
+			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
 		}
 	}
 
-	public function deleteDataTMB()
+	public function deleteData()
 	{
-		$id_timbangan	= $this->encryption->decrypt(escape($this->input->post('timbanganId', TRUE)));
-
-			$this->db->where('id_timbangan', $id_timbangan);
-			$this->db->delete('ms_timbangan');
-			return array('message'=>'SUCCESS');
+		$id_stok_masuk	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$this->db->where('id_stok_masuk', $id_stok_masuk);
+		$this->db->delete('ta_vaksin_masuk');
+		return array('message'=>'SUCCESS');
 		
-	}
-
-	public function getDataTiket($token)
-	{
-        $this->db->select('a.id_timbangan,
-							a.token,
-							a.id_master_truck,
-							a.no_tiket,
-							a.id_pemasok,
-							a.id_master_tpa,
-							a.total_stok,
-							a.jam_masuk,
-							a.jam_keluar,
-							a.berat_masuk,
-							a.berat_keluar,
-							a.berat_bersih,
-							a.id_penyalur,
-							a.tanggal,
-							a.biaya,
-							a.flag,
-							b.nm_kondisi,
-							c.plat_no,
-							d.lokasi_tpa,
-							d.nama_tpa,
-							e.id_regency,
-							f.name
-							');
-        $this->db->from('ms_timbangan a');
-        $this->db->join('wa_kondisi b', 'a.id_penyalur = b.id_penyalur', 'inner');
-        $this->db->join('master_truck c', 'a.id_master_truck = c.id_master_truck', 'left');
-        $this->db->join('master_tpa d', 'c.id_master_tpa = d.id_master_tpa', 'left');
-        $this->db->join('tb_pemasok e', 'e.id_pemasok = a.id_pemasok', 'left');
-        $this->db->join('wa_regency f', 'f.id = e.id_regency', 'left');
-		$this->db->where('a.token', $token);
-		$query = $this->db->get();
-		return $query->row_array();
 	}
 }
 

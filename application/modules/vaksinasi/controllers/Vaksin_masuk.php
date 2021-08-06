@@ -22,8 +22,9 @@ class Vaksin_masuk extends SLP_Controller {
     	$this->breadcrumb->add('Vaksinasi', '#');
 		$this->breadcrumb->add('Vaksin Masuk', '#');
 
-		$this->session_info['page_name'] 		= "Vaksin Masuk";
-		$this->session_info['list_penyalur']    = $this->mmas->getDataPenyalur();
+		$this->session_info['page_name'] 			= "Vaksin Masuk";
+		$this->session_info['list_penyalur']    	= $this->mmas->getDataPenyalur();
+		$this->session_info['list_jenis_vaksin']    = $this->mmas->getDataJenisVaksin();
 
     	$this->template->build('vaksin_masuk/vlist', $this->session_info);
 	}
@@ -45,9 +46,9 @@ class Vaksin_masuk extends SLP_Controller {
 					$row[] = $no;
 							$row[] = $dl['tanggal'];
 							$row[] = format_ribuan($dl['total_stok']);
-							$row[] = $dl['id_penyalur'];
-					$row[] = '<button type="button" class="btn btn-xs '.$color.' btnEdit" data-id="'.$this->encryption->encrypt($dl['id_stok_masuk']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<a href="'.site_url($this->_url.'/tiket'.'/'.$dl['token']).'"  type="button" '.$disabled.' class="btn btn-xs btn-success confirm-tiket" title="Print"><i class="fa fa-print"></i></a>
+							$row[] = $dl['nm_vaksin'];
+							$row[] = $dl['nm_penyalur'];
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_stok_masuk']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_stok_masuk']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
@@ -75,11 +76,9 @@ class Vaksin_masuk extends SLP_Controller {
 				if($this->mVaksinMasuk->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mVaksinMasuk->insertDataTMB();
-					if($data['message'] == 'ERROR') {
-						$result = array('status' => 0, 'message' => array('isi' => 'Proses input data dengan kode <b>'.$data['kode'].'</b> gagal, karena sudah ada yang terdaftar dengan kode tersebut...'), 'csrfHash' => $csrfHash);
-					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data TPA dengan kode <b>'.$data['kode'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
+					$data = $this->mVaksinMasuk->insertData();
+					if($data['message'] == 'SUCCESS') {
+						$result = array('status' => 1, 'message' => 'Data vaksin masuk pada tanggal <b>'.$data['tanggal'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -96,13 +95,14 @@ class Vaksin_masuk extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_stok_masuk  = $this->input->post('timbanganId', TRUE);
+			$id_stok_masuk  = $this->input->post('vaksinId', TRUE);
 			if(!empty($id_stok_masuk) AND !empty($session)) {
-				$data = $this->mVaksinMasuk->getDataDetailTMB($this->encryption->decrypt($id_stok_masuk));
+				$data = $this->mVaksinMasuk->getDataDetail($this->encryption->decrypt($id_stok_masuk));
 				$row = array();
-				$row['total_stok']		=	!empty($data) ? $data['total_stok'] : '';
-				$row['id_penyalur']		=	!empty($data) ? $data['id_penyalur'] : '';
-				$row['tanggal']			= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal'])) : '';
+				$row['total_stok']			=	!empty($data) ? $data['total_stok'] : '';
+				$row['id_jenis_vaksin']		=	!empty($data) ? $data['id_jenis_vaksin'] : '';
+				$row['id_penyalur']			=	!empty($data) ? $data['id_penyalur'] : '';
+				$row['tanggal']				= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal'])) : '';
 
 				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);
 			} else {
@@ -119,20 +119,20 @@ class Vaksin_masuk extends SLP_Controller {
 		} else {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
-			$id_stok_masuk  = $this->input->post('timbanganId', TRUE);
+			$id_stok_masuk  = $this->input->post('vaksinId', TRUE);
 			if(!empty($session) AND !empty($id_stok_masuk)) {
 				if($this->mVaksinMasuk->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mVaksinMasuk->updateDataTMB();
+					$data = $this->mVaksinMasuk->updateData();
 					if($data['message'] == 'NODATA') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data dengan <b>'.$data['kode'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data dengan <b>'.$data['tanggal'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
-				$result = array('status' => 0, 'message' => array('isi' => 'Proses update data TPA gagal, mohon periksa data kembali...'), 'csrfHash' => $csrfHash);
+				$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, mohon periksa data kembali...'), 'csrfHash' => $csrfHash);
 			}
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
@@ -145,9 +145,9 @@ class Vaksin_masuk extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_stok_masuk 	= escape($this->input->post('timbanganId', TRUE));
+			$id_stok_masuk 	= escape($this->input->post('vaksinId', TRUE));
 			if(!empty($session) AND !empty($id_stok_masuk)) {
-				$data = $this->mVaksinMasuk->deleteDataTMB();
+				$data = $this->mVaksinMasuk->deleteData();
 				if($data['message'] == 'ERROR') {
 					$result = array('status' => 0, 'message' => 'Proses delete data gagal dikarenakan data tidak ditemukan...', 'csrfHash' => $csrfHash);
 				}	else if($data['message'] == 'SUCCESS') {

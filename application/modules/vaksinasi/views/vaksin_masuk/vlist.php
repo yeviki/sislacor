@@ -44,10 +44,17 @@
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-3">
+                  <div class="form-group required">
+                    <label for="jenis_vaksin" class="control-label"><b>Jenis Vaksin <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('jenis_vaksin', $list_jenis_vaksin, $this->input->post('jenis_vaksin'), 'class="select-all"');?>
+                    <div class="help-block"></div>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-3">
                     <div class="form-group">
                         <label for="tanggal" class="control-label"><b>Pilih Tanggal <font color="red" size="1em">(*)</font></b></label>
                         <div class="input-group date datemonth">
-                          <input type="text" class="form-control mask" name="tanggalkeluhan" id="tanggalkeluhan" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggalkeluhan', TRUE); ?>">
+                          <input type="text" class="form-control mask" name="tanggal" id="tanggal" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal', TRUE); ?>">
                           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                         </div>
                     </div>
@@ -86,8 +93,9 @@
                   <th width="3%">#</th>
                   <th width="17%">Tanggal</th>
                   <th width="17%">Total Stok</th>
+                  <th width="17%">Jenis Vaksin</th>
                   <th width="17%">Penyalur</th>
-                  <th width="8%">Action</th>
+                  <th width="5%">Action</th>
                 </tr>
               </thead>
             </table>
@@ -113,26 +121,33 @@
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
                 <label for="total_stok" class="control-label" style="font-size:15px;"><b>Total Stok <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control" name="total_stok" id="total_stok" placeholder="Nama Supir" value="<?php echo $this->input->post('total_stok', TRUE); ?>">
+                <input type="text" class="form-control nominal" name="total_stok" id="total_stok" placeholder="Total" value="<?php echo $this->input->post('total_stok', TRUE); ?>">
                 <div class="help-block"></div>
               </div>
             </div>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="tanggal" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
+                <label for="tanggal_masuk" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
                   <div class="input-group date datemonth">
-                    <input type="text" class="form-control mask" name="tanggalkeluhan" id="tanggalkeluhan" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggalkeluhan', TRUE); ?>">
+                    <input type="text" class="form-control mask" name="tanggal_masuk" id="tanggal_masuk" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_masuk', TRUE); ?>">
                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                   </div>
-                  <?php echo form_error('tanggal'); ?>
+                  <?php echo form_error('tanggal_masuk'); ?>
                 <div class="help-block"></div>
               </div>
             </div>
           </div>
           <div class="row">
-            <div class="col-xs-12 col-sm-12">
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="penyalur" class="control-label"><b>Nama Penyalur<font color="red" size="1em">(Wajib isi)</font></b></label>
+                <label for="jenis_vaksin" class="control-label"><b>Jenis Vaksin <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('jenis_vaksin', $list_jenis_vaksin, $this->input->post('jenis_vaksin'), 'class="select-all" id="jenis_vaksin"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
                 <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all" id="penyalur"');?>
                 <div class="help-block"></div>
               </div>
@@ -152,8 +167,6 @@
   $.fn.modal.Constructor.prototype.enforceFocus = function() {};
   var csrfName  = '<?php echo $this->security->get_csrf_token_name(); ?>';
   var site      = '<?php echo site_url();?>';
-  var truckID   = '';
-  var suppID    = '';
 
   function run_waitMe(el) {
     el.waitMe({
@@ -171,6 +184,7 @@
   }
 
   $(document).ready(function() {
+    getDataList();
     $('.mask').inputmask();
     $(".datemonth").datepicker({
       autoclose: true,
@@ -178,10 +192,6 @@
       todayHighlight: true,
       startView: 'month',
     });
-  });
-
-  $(document).ready(function(e){
-    getDataList();
   });
 
   $(document).on('click', '.btnFilter', function(e){
@@ -353,7 +363,8 @@
         if(data.status == 1) {
           $('input[name="vaksinId"]').val(id_vaksin_masuk);
           $('#total_stok').val(data.message.total_stok);
-          $('#tanggal').val(data.message.tanggal);
+          $('#tanggal_masuk').val(data.message.tanggal);
+          $('#jenis_vaksin').select2('val', data.message.id_jenis_vaksin).trigger('change');
           $('#penyalur').select2('val', data.message.id_penyalur).trigger('change');
         }
         $('#frmEntry').waitMe('hide');
