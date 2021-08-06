@@ -211,6 +211,19 @@ class Model_master extends CI_Model
     }
     return $dd_sp;
   }
+
+  public function getDataPenyalur()
+  {
+		$this->db->order_by('id_penyalur ASC');
+		$query = $this->db->get('ref_penyalur');
+    $dd_penyalur[''] = 'Pilih Penyalur';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_penyalur[$row['id_penyalur']] = $row['nm_penyalur'];
+      }
+    }
+    return $dd_penyalur;
+  }
 }
 
 // This is the end of auth signin model
