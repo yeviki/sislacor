@@ -1,33 +1,33 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
 /**
- * Description of Suplai Vaksin class
+ * Description of Suplai Capaian Vaksin
  *
  * @author Yogi "solop" Kaputra
  */
 
-class Suplai_vaksin extends SLP_Controller {
+class Capaian_vaksin extends SLP_Controller {
 	private $_url  = '';
 
 	public function __construct()
 	{
 		parent::__construct();
-		$this->_url  = 'vaksinasi/suplai-vaksin';
-		$this->load->model(array('Model_suplai_vaksin' => 'mSuplaiVaksin', 'master/model_master' => 'mmas'));
+		$this->_url  = 'vaksinasi/capaian-vaksin';
+		$this->load->model(array('Model_capaian_vaksin' => 'mCapaianVaksin', 'master/model_master' => 'mmas'));
 	}
 
 	public function index()
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Vaksinasi', '#');
-		$this->breadcrumb->add('Vaksin Keluar', '#');
+		$this->breadcrumb->add('Capaian Vaksin', '#');
 
-		$this->session_info['page_name'] 			= "Vaksin Keluar";
-		$this->session_info['list_penyalur']    	= $this->mmas->getDataPenyalur();
+		$this->session_info['page_name'] 	        = "Capaian Vaksin";
+		$this->session_info['list_suplai_vaksin']   = $this->mmas->getDataSuplai();
+        $this->session_info['list_penyalur']    	= $this->mmas->getDataPenyalur();
 		$this->session_info['list_jenis_vaksin']    = $this->mmas->getDataJenisVaksin();
-		$this->session_info['list_kabkota']         = $this->mmas->getDataRegency();
 
-    	$this->template->build('vaksin_keluar/vlist', $this->session_info);
+    	$this->template->build('capaian_vaksin/vlist', $this->session_info);
 	}
 
 	public function listview()
@@ -39,26 +39,26 @@ class Suplai_vaksin extends SLP_Controller {
 			$session = $this->app_loader->current_account();
 			if(isset($session)){
 				$param = $this->input->post('param',TRUE);
-		    	$dataList = $this->mSuplaiVaksin->get_datatables($param);
+		    	$dataList = $this->mCapaianVaksin->get_datatables($param);
 				$no = $this->input->post('start');
 				foreach ($dataList as $key => $dl) {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal_suplai'];
-							$row[] = format_ribuan($dl['total_suplai']);
+							$row[] = $dl['tanggal_capaian'];
+							$row[] = format_ribuan($dl['total_vaksinasi']);
 							$row[] = $dl['nm_vaksin'];
 							$row[] = $dl['nm_penyalur'];
 							$row[] = regency($dl['regency_id']);
-					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_suplai_vaksin']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_suplai_vaksin']).'" title="Delete"><i class="fa fa-times"></i> </button>';
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_capaian_vaksin']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_capaian_vaksin']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
 				$output = array(
 					"draw" => $this->input->post('draw'),
-					"recordsTotal" => $this->mSuplaiVaksin->count_all(),
-					"recordsFiltered" => $this->mSuplaiVaksin->count_filtered($param),
+					"recordsTotal" => $this->mCapaianVaksin->count_all(),
+					"recordsFiltered" => $this->mCapaianVaksin->count_filtered($param),
 					"data" => $data,
 				);
 			}
@@ -75,12 +75,12 @@ class Suplai_vaksin extends SLP_Controller {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
 			if(!empty($session)) {
-				if($this->mSuplaiVaksin->validasiDataValue() == FALSE) {
+				if($this->mCapaianVaksin->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mSuplaiVaksin->insertData();
+					$data = $this->mCapaianVaksin->insertData();
 					if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data vaksin keluar pada tanggal suplai <b>'.$data['tanggal_suplai'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data capaian vaksin pada tanggal <b>'.$data['tanggal_capaian'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -97,15 +97,13 @@ class Suplai_vaksin extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_suplai_vaksin  = $this->input->post('vaksinId', TRUE);
-			if(!empty($id_suplai_vaksin) AND !empty($session)) {
-				$data = $this->mSuplaiVaksin->getDataDetail($this->encryption->decrypt($id_suplai_vaksin));
+			$id_capaian_vaksin  = $this->input->post('vaksinId', TRUE);
+			if(!empty($id_capaian_vaksin) AND !empty($session)) {
+				$data = $this->mCapaianVaksin->getDataDetail($this->encryption->decrypt($id_capaian_vaksin));
 				$row = array();
-				$row['total_suplai']		=	!empty($data) ? $data['total_suplai'] : '';
-				$row['id_jenis_vaksin']		=	!empty($data) ? $data['id_jenis_vaksin'] : '';
-				$row['id_penyalur']			=	!empty($data) ? $data['id_penyalur'] : '';
-				$row['regency_id']			=	!empty($data) ? $data['regency_id'] : '';
-				$row['tanggal_suplai']		= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal_suplai'])) : '';
+				$row['id_suplai_vaksin']	=	!empty($data) ? $data['id_suplai_vaksin'] : '';
+				$row['total_vaksinasi']		=	!empty($data) ? $data['total_vaksinasi'] : '';
+				$row['tanggal_capaian']		= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal_capaian'])) : '';
 
 				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);
 			} else {
@@ -122,16 +120,16 @@ class Suplai_vaksin extends SLP_Controller {
 		} else {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
-			$id_suplai_vaksin  = $this->input->post('vaksinId', TRUE);
-			if(!empty($session) AND !empty($id_suplai_vaksin)) {
-				if($this->mSuplaiVaksin->validasiDataValue() == FALSE) {
+			$id_capaian_vaksin  = $this->input->post('vaksinId', TRUE);
+			if(!empty($session) AND !empty($id_capaian_vaksin)) {
+				if($this->mCapaianVaksin->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mSuplaiVaksin->updateData();
+					$data = $this->mCapaianVaksin->updateData();
 					if($data['message'] == 'NODATA') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data dengan <b>'.$data['tanggal_suplai'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data dengan <b>'.$data['tanggal_capaian'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -148,9 +146,9 @@ class Suplai_vaksin extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_suplai_vaksin 	= escape($this->input->post('vaksinId', TRUE));
-			if(!empty($session) AND !empty($id_suplai_vaksin)) {
-				$data = $this->mSuplaiVaksin->deleteData();
+			$id_capaian_vaksin 	= escape($this->input->post('vaksinId', TRUE));
+			if(!empty($session) AND !empty($id_capaian_vaksin)) {
+				$data = $this->mCapaianVaksin->deleteData();
 				if($data['message'] == 'ERROR') {
 					$result = array('status' => 0, 'message' => 'Proses delete data gagal dikarenakan data tidak ditemukan...', 'csrfHash' => $csrfHash);
 				}	else if($data['message'] == 'SUCCESS') {

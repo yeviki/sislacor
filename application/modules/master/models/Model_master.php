@@ -238,6 +238,35 @@ class Model_master extends CI_Model
     return $dd_vaksin;
   }
 
+  public function getDataSuplai()
+  {
+		$this->db->select('a.id_suplai_vaksin,
+								a.total_suplai,
+								a.id_jenis_vaksin,
+								a.id_penyalur,
+								a.tanggal_suplai,
+								a.regency_id,
+								a.create_by,
+								a.create_date,
+								a.create_ip,
+								a.mod_by,
+								a.mod_date,
+								a.mod_ip,
+								b.nm_vaksin,
+								c.nm_penyalur
+								');
+		$this->db->join('ref_jenis_vaksin b', 'b.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
+		$this->db->join('ref_penyalur c', 'c.id_penyalur = a.id_penyalur', 'inner');
+		$query = $this->db->get('ta_suplai_vaksin a');
+    $dd_suplai_vaksin[''] = 'Pilih Suplai';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_suplai_vaksin[$row['id_suplai_vaksin']] = format_ribuan($row['total_suplai']).' - '.regency($row['regency_id']);
+      }
+    }
+    return $dd_suplai_vaksin;
+  }
+
 }
 
 // This is the end of auth signin model

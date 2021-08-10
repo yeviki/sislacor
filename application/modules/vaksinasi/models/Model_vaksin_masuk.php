@@ -161,7 +161,7 @@ class Model_vaksin_masuk extends CI_Model
 			return array('message'=>'ERROR', 'tanggal'=>$tanggal);
 		else {
 				$data = array(
-					'tanggal'			=> $tanggal,
+					'tanggal'			=> date_convert(escape($this->input->post('tanggal', TRUE))),
 					'total_stok'		=> escape($this->input->post('total_stok', TRUE)),
 					'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
 					'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),

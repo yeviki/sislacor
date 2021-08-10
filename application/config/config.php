@@ -472,7 +472,8 @@ $config['csrf_exclude_uris'] = array( 'manajemen/users/listview','otg/listview',
                                       'verifikasi-kasus/kasus/listview',
                                       'spesimen/pengujian/listview',
                                       'vaksinasi/vaksin-masuk/listview',
-                                      'vaksinasi/suplai-vaksin/listview'
+                                      'vaksinasi/suplai-vaksin/listview',
+                                      'vaksinasi/capaian-vaksin/listview'
                                     );
 /*
 |--------------------------------------------------------------------------

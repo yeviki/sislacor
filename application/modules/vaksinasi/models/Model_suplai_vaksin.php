@@ -1,7 +1,7 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
 /**
- * Description of model vaksin masuk
+ * Description of model suplai vaksin
  *
  * @author Yogi "solop" Kaputra
  */
@@ -164,7 +164,7 @@ class Model_suplai_vaksin extends CI_Model
 			return array('message'=>'ERROR', 'tanggal_suplai'=>$tanggal_suplai);
 		else {
 				$data = array(
-					'tanggal_suplai'	=> $tanggal_suplai,
+					'tanggal_suplai'	=> date_convert(escape($this->input->post('tanggal_suplai', TRUE))),
 					'total_suplai'		=> escape($this->input->post('total_suplai', TRUE)),
 					'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
 					'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),
