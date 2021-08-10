@@ -1,7 +1,7 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
 /**
- * Description of model
+ * Description of model pendataan
  * 
  * @author Yogi "solop" Kaputra
  */
