@@ -76,7 +76,7 @@ class Pendataan extends SLP_Controller {
 				} else {
 					$data = $this->mPendataan->insertData();
 					if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data kasus pada tanggal_kasus <b>'.$data['tanggal_kasus'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data kasus pada tanggal <b>'.$data['tanggal_kasus'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
