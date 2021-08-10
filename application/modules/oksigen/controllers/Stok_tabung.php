@@ -20,10 +20,10 @@ class Stok_tabung extends SLP_Controller {
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Oksigen', '#');
-		$this->breadcrumb->add('Ketersediaan Tabung', '#');
+		$this->breadcrumb->add('Stok Tabung', '#');
 		$this->session_info['list_id_kat_tabung']   	= $this->mmas->getDataKatTabung();
 		$this->session_info['list_id_rs']   			= $this->mmas->getDataMasterHospital();
-		$this->session_info['page_name'] = "Ketersediaan Tabung Oksigen";
+		$this->session_info['page_name'] = "Stok Tabung";
 
     	$this->template->build('stok_tabung/vlist', $this->session_info);
 	}

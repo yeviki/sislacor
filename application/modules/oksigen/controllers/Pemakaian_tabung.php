@@ -19,12 +19,12 @@ class Pemakaian_tabung extends SLP_Controller {
 	public function index()
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
-    	$this->breadcrumb->add('Kamar', '#');
-		$this->breadcrumb->add('Pemakaian Kamar', '#');
+    	$this->breadcrumb->add('Oksigen', '#');
+		$this->breadcrumb->add('Pemakaian Tabung', '#');
 		$this->session_info['list_pemakaian_tabung']   	= $this->mmas->getDataStokTabung();
         $this->session_info['list_id_kat_tabung']   	= $this->mmas->getDataKatTabung();
 		$this->session_info['list_id_rs']   			= $this->mmas->getDataMasterHospital();
-		$this->session_info['page_name'] = "Pemakaian Kamar";
+		$this->session_info['page_name'] = "Pemakaian Tabung";
 
     	$this->template->build('pemakaian_tabung/vlist', $this->session_info);
 	}
