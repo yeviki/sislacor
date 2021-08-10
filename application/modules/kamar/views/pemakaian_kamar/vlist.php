@@ -8,7 +8,7 @@
   <div class="row" id="formParent">    
     <div class="col-xs-12 col-sm-12">
       <div class="btn-toolbar" style="margin-bottom: 15px">
-        <a type="button" href="<?php echo site_url('vaksinasi/vaksin-masuk'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
+        <a type="button" href="<?php echo site_url('vaksinasi/capaian-vaksin'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
           <button type="button" class="btn btn-primary-alt" id="btnAdd" style="padding:11px 16px;"><b><i class="fa fa-plus"></i> Tambah Baru</b></button>
       </div>
     </div>
@@ -38,15 +38,15 @@
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group required">
-                    <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all"');?>
+                    <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group required">
-                    <label for="jenis_vaksin" class="control-label"><b>Jenis Vaksin <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('jenis_vaksin', $list_jenis_vaksin, $this->input->post('jenis_vaksin'), 'class="select-all"');?>
+                    <label for="id_kamar" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('id_kamar', $list_id_kat_kamar, $this->input->post('id_kamar'), 'class="select-all" id="id_kamar"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
@@ -83,7 +83,7 @@
     <div class="col-xs-12 col-sm-12">
       <div class="panel panel-green">
         <div class="panel-heading">
-          <h4>Data Vaksin Masuk</h4>
+          <h4>Data Kamar</h4>
         </div>
         <div class="panel-body collapse in">
           <div class="table-responsive">
@@ -92,9 +92,9 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal</th>
-                  <th width="17%">Total Stok</th>
-                  <th width="17%">Jenis Vaksin</th>
-                  <th width="17%">Penyalur</th>
+                  <th width="17%">Total Kamar</th>
+                  <th width="17%">Rumah Sakit</th>
+                  <th width="17%">Kategori</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -111,44 +111,37 @@
     <div class="modal-content">
       <div class="modal-header" style="padding:10px 15px 10px 15px;">
         <button type="button" class="close btnClose" aria-hidden="true">&times;</button>
-        <h4 class="modal-title"><b>FORM ENTRI VAKSIN MASUK</b></h4>
+        <h4 class="modal-title"><b>FORM ENTRI PEMAKAIAN KAMAR</b></h4>
       </div>
-      <?php echo form_open(site_url('vaksinasi/vaksin-masuk/create'), array('id' => 'formEntry')); ?>
+      <?php echo form_open(site_url('kamar/pemakaian-kamar/create'), array('id' => 'formEntry')); ?>
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
             <?php echo form_hidden('vaksinId', ''); ?>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="total_stok" class="control-label" style="font-size:15px;"><b>Total Stok <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_stok" id="total_stok" placeholder="Total" value="<?php echo $this->input->post('total_stok', TRUE); ?>">
+                <label for="total_terpakai" class="control-label" style="font-size:15px;"><b>Total Pemakaian <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_terpakai" id="total_terpakai" placeholder="Total" value="<?php echo $this->input->post('total_terpakai', TRUE); ?>">
                 <div class="help-block"></div>
               </div>
             </div>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="tanggal_masuk" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
+                <label for="tanggal_pemakaian" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
                   <div class="input-group date datemonth">
-                    <input type="text" class="form-control mask" name="tanggal_masuk" id="tanggal_masuk" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_masuk', TRUE); ?>">
+                    <input type="text" class="form-control mask" name="tanggal_pemakaian" id="tanggal_pemakaian" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_pemakaian', TRUE); ?>">
                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                   </div>
-                  <?php echo form_error('tanggal_masuk'); ?>
+                  <?php echo form_error('tanggal_pemakaian'); ?>
                 <div class="help-block"></div>
               </div>
             </div>
           </div>
           <div class="row">
-            <div class="col-xs-12 col-sm-6">
+            <div class="col-xs-12 col-sm-12">
               <div class="form-group required">
-                <label for="jenis_vaksin" class="control-label"><b>Jenis Vaksin <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('jenis_vaksin', $list_jenis_vaksin, $this->input->post('jenis_vaksin'), 'class="select-all" id="jenis_vaksin"');?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all" id="penyalur"');?>
+                <label for="id_rs_kamar" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('id_rs_kamar', $list_pemakaian_kamar, $this->input->post('id_rs_kamar'), 'class="select-all" id="id_rs_kamar"');?>
                 <div class="help-block"></div>
               </div>
             </div>
@@ -221,7 +214,7 @@
       "serverSide": true,
       "ordering": false,
       "ajax": {
-        "url": site + "vaksinasi/vaksin-masuk/listview",
+        "url": site + "kamar/pemakaian-kamar/listview",
         "type": "POST",
         "data": {
           "param" : $('#formFilter').serializeArray(),
@@ -258,7 +251,7 @@
   });
 
   function formReset() {
-    $('#formEntry').attr('action', site + 'vaksinasi/vaksin-masuk/create');
+    $('#formEntry').attr('action', site + 'kamar/pemakaian-kamar/create');
     $('#errEntry').html('');
     $('.select-all').select2('val', '');
     $('#status').select2('val', 1);
@@ -343,29 +336,28 @@
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
-    $('#formEntry').attr('action', site + 'vaksinasi/vaksin-masuk/update');
-    var id_vaksin_masuk = $(this).data('id');
+    $('#formEntry').attr('action', site + 'kamar/pemakaian-kamar/update');
+    var id_pemakaian_kamar = $(this).data('id');
     $('#modalEntryForm').modal({
       backdrop: 'static'
     });
-    getDataVaksinMasuk(id_vaksin_masuk);
+    getDataVaksinMasuk(id_pemakaian_kamar);
   });
 
-  function getDataVaksinMasuk(id_vaksin_masuk) {
+  function getDataVaksinMasuk(id_pemakaian_kamar) {
     run_waitMe($('#frmEntry'));
     $.ajax({
       type: 'POST',
-      url: site + 'vaksinasi/vaksin-masuk/details',
-      data: {'vaksinId' : id_vaksin_masuk, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
+      url: site + 'kamar/pemakaian-kamar/details',
+      data: {'vaksinId' : id_pemakaian_kamar, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
       dataType: 'json',
       success: function(data) {
         $('input[name="'+csrfName+'"]').val(data.csrfHash);
         if(data.status == 1) {
-          $('input[name="vaksinId"]').val(id_vaksin_masuk);
-          $('#total_stok').val(data.message.total_stok);
-          $('#tanggal_masuk').val(data.message.tanggal_masuk);
-          $('#jenis_vaksin').select2('val', data.message.id_jenis_vaksin).trigger('change');
-          $('#penyalur').select2('val', data.message.id_penyalur).trigger('change');
+          $('input[name="vaksinId"]').val(id_pemakaian_kamar);
+          $('#total_terpakai').val(data.message.total_terpakai);
+          $('#tanggal_pemakaian').val(data.message.tanggal_pemakaian);
+          $('#id_rs_kamar').select2('val', data.message.id_rs_kamar).trigger('change');
         }
         $('#frmEntry').waitMe('hide');
       }
@@ -402,7 +394,7 @@
           callback:function(response){
             if (response) {
               $.ajax({
-                url: site + 'vaksinasi/vaksin-masuk/delete',
+                url: site + 'kamar/pemakaian-kamar/delete',
                 type: "POST",
                 data: postData,
                 dataType: "json",

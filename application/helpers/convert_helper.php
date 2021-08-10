@@ -508,6 +508,21 @@ if (!function_exists('array_group_by')) {
 		}
 		return $grouped;
 	}
+
+  /**
+ * Fungsi get kat kamar
+ */
+if (!function_exists('kamar')) {
+  function kamar($id) {
+    $ci =& get_instance();
+    $ci->load->database();
+    $ci->db->where('id_kat_kamar', $id);
+    $row = $ci->db->get('ref_kat_kamar')->row_array();
+    $nm_kamar = !empty($row) ? $row['nm_kamar'] : '';
+    return $nm_kamar;
+  }
+}
+
 }
 
 /* End of file string_helper.php */

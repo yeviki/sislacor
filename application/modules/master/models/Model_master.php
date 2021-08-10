@@ -267,6 +267,41 @@ class Model_master extends CI_Model
     return $dd_suplai_vaksin;
   }
 
+  public function getDataKamar()
+  {
+		$this->db->order_by('id_kat_kamar ASC');
+		$query = $this->db->get('ref_kat_kamar');
+    $dd_kamar[''] = 'Pilih Kategori Kamar';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_kamar[$row['id_kat_kamar']] = $row['nm_kamar'];
+      }
+    }
+    return $dd_kamar;
+  }
+
+  public function getDataStokKamar()
+  {
+		$this->db->select('a.id_rs_kamar,
+								a.total_kamar,
+								a.id_rs,
+								a.id_kat_kamar,
+								a.tanggal,
+								b.fullname,
+								c.nm_kamar
+								');
+		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
+		$this->db->join('ref_kat_kamar c', 'c.id_kat_kamar = a.id_kat_kamar', 'inner');
+		$query = $this->db->get('ta_rs_kamar a');
+    $dd_kamar[''] = 'Pilih Kamar';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_kamar[$row['id_rs_kamar']] = format_ribuan($row['total_kamar']) .' - '. $row['nm_kamar'] .' - '. $row['fullname'];
+      }
+    }
+    return $dd_kamar;
+  }
+
 }
 
 // This is the end of auth signin model

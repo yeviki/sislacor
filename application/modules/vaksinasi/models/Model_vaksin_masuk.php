@@ -27,7 +27,7 @@ class Model_vaksin_masuk extends CI_Model
 			return true;
 	}
 
-	var $search = array('id_penyalur', 'id_jenis_vaksin', 'tanggal');
+	var $search = array('id_penyalur', 'id_jenis_vaksin', 'tanggal_masuk');
 	public function get_datatables($param)
 	{
 		$this->_get_datatables_query($param);
@@ -50,7 +50,7 @@ class Model_vaksin_masuk extends CI_Model
 								a.total_stok,
 								a.id_jenis_vaksin,
 								a.id_penyalur,
-								a.tanggal,
+								a.tanggal_masuk,
 								a.create_by,
 								a.create_date,
 								a.create_ip,
@@ -77,7 +77,7 @@ class Model_vaksin_masuk extends CI_Model
 							a.total_stok,
 							a.id_jenis_vaksin,
 							a.id_penyalur,
-							a.tanggal,
+							a.tanggal_masuk,
 							b.nm_vaksin,
 							c.nm_penyalur
 							');
@@ -91,9 +91,9 @@ class Model_vaksin_masuk extends CI_Model
 		// Jenis Vaksin
 		if(isset($post['jenis_vaksin']) AND $post['jenis_vaksin'] != '')
 			$this->db->where('a.id_jenis_vaksin', $post['jenis_vaksin']);
-		// Tanggal Masuk
-        if(isset($post['tanggal']) AND $post['tanggal'] != ''){
-			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y")', $post['tanggal']);
+		// tanggal_masuk Masuk
+        if(isset($post['tanggal_masuk']) AND $post['tanggal_masuk'] != ''){
+			$this->db->where('DATE_FORMAT(a.tanggal_masuk, "%m/%d/%Y")', $post['tanggal_masuk']);
 		}
 		
 		$i = 0;
@@ -111,7 +111,7 @@ class Model_vaksin_masuk extends CI_Model
 			}
 		$i++;
 		}
-		$this->db->order_by('a.tanggal DESC');
+		$this->db->order_by('a.tanggal_masuk DESC');
 		$this->db->order_by('a.id_stok_masuk DESC');
   	}
 
@@ -129,10 +129,10 @@ class Model_vaksin_masuk extends CI_Model
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
 
-		$tanggal			= date_convert(escape($this->input->post('tanggal_masuk', TRUE)));
+		$tanggal_masuk			= date_convert(escape($this->input->post('tanggal_masuk', TRUE)));
 
 			$data = array(
-				'tanggal'			=> $tanggal,
+				'tanggal_masuk'			=> $tanggal_masuk,
 				'total_stok'		=> escape($this->input->post('total_stok', TRUE)),
 				'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
 				'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),
@@ -144,7 +144,7 @@ class Model_vaksin_masuk extends CI_Model
 				'mod_ip'			=> $create_ip
 			);
 			$this->db->insert('ta_vaksin_masuk', $data);
-			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
+			return array('message'=>'SUCCESS', 'tanggal_masuk'=>$tanggal_masuk);
 	}
 
 	public function updateData()
@@ -156,12 +156,12 @@ class Model_vaksin_masuk extends CI_Model
 
 		//cek data
 		$dataVaksin 	= $this->getDataDetail($id_stok_masuk);
-		$tanggal  	= !empty($dataVaksin) ? $dataVaksin['tanggal'] : '';
+		$tanggal_masuk  	= !empty($dataVaksin) ? $dataVaksin['tanggal_masuk'] : '';
 		if(count($dataVaksin) <= 0)
-			return array('message'=>'ERROR', 'tanggal'=>$tanggal);
+			return array('message'=>'ERROR', 'tanggal_masuk'=>$tanggal_masuk);
 		else {
 				$data = array(
-					'tanggal'			=> date_convert(escape($this->input->post('tanggal', TRUE))),
+					'tanggal_masuk'			=> date_convert(escape($this->input->post('tanggal_masuk', TRUE))),
 					'total_stok'		=> escape($this->input->post('total_stok', TRUE)),
 					'id_jenis_vaksin'	=> escape($this->input->post('jenis_vaksin', TRUE)),
 					'id_penyalur'		=> escape($this->input->post('penyalur', TRUE)),
@@ -171,7 +171,7 @@ class Model_vaksin_masuk extends CI_Model
 				);
 			$this->db->where('id_stok_masuk', $id_stok_masuk);
 			$this->db->update('ta_vaksin_masuk', $data);
-			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
+			return array('message'=>'SUCCESS', 'tanggal_masuk'=>$tanggal_masuk);
 		}
 	}
 
