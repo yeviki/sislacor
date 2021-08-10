@@ -302,6 +302,42 @@ class Model_master extends CI_Model
     return $dd_kamar;
   }
 
+
+  public function getDataKatTabung()
+  {
+		$this->db->order_by('id_kat_tabung ASC');
+		$query = $this->db->get('ref_kat_tabung');
+    $dd_tabung[''] = 'Pilih Kategori Tabung';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_tabung[$row['id_kat_tabung']] = $row['nm_tabung'];
+      }
+    }
+    return $dd_tabung;
+  }
+
+  public function getDataStokTabung()
+  {
+		$this->db->select('a.id_stok_tabung,
+								a.total_stok_tabung,
+								a.id_rs,
+								a.id_kat_tabung,
+								a.tanggal,
+								b.fullname,
+								c.nm_tabung
+								');
+		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
+		$this->db->join('ref_kat_tabung c', 'c.id_kat_tabung = a.id_kat_tabung', 'inner');
+		$query = $this->db->get('ta_stok_tabung a');
+    $dd_kamar[''] = 'Pilih Kamar';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_kamar[$row['id_stok_tabung']] = format_ribuan($row['total_stok_tabung']) .' - '. $row['nm_tabung'] .' - '. $row['fullname'];
+      }
+    }
+    return $dd_kamar;
+  }
+
 }
 
 // This is the end of auth signin model
