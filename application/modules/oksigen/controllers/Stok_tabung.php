@@ -44,9 +44,9 @@ class Stok_tabung extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal'];
-							$row[] = format_ribuan($dl['total_stok_tabung']);
 							$row[] = rujukan($dl['id_rs']);
 							$row[] = tabung($dl['id_kat_tabung']);
+							$row[] = format_ribuan($dl['total_stok_tabung']);
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_stok_tabung']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_stok_tabung']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;

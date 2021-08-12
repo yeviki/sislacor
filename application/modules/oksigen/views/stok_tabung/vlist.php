@@ -92,9 +92,9 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal</th>
-                  <th width="17%">Total Tabung</th>
                   <th width="17%">Rumah Sakit</th>
                   <th width="17%">Kategori</th>
+                  <th width="17%">Total Tabung</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>

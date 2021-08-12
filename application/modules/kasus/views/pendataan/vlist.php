@@ -85,10 +85,10 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal Kasus</th>
-                  <th width="17%">Total Positif</th>
-                  <th width="17%">Total Sembuh</th>
-                  <th width="17%">Total Meninggal</th>
                   <th width="17%">Kab/Kota</th>
+                  <th width="17%">Total Sembuh</th>
+                  <th width="17%">Total Positif</th>
+                  <th width="17%">Total Meninggal</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>

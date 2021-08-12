@@ -92,10 +92,10 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal Keluar</th>
-                  <th width="17%">Total Suplai</th>
-                  <th width="17%">Jenis Vaksin</th>
-                  <th width="17%">Penyalur</th>
                   <th width="17%">Kab/Kota</th>
+                  <th width="17%">Penyalur</th>
+                  <th width="17%">Jenis Vaksin</th>
+                  <th width="17%">Total Suplai</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -118,6 +118,15 @@
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group required">
+                <label for="suplai_vaksin" class="control-label"><b>Suplai Vaksin <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('suplai_vaksin', $list_suplai_vaksin, $this->input->post('suplai_vaksin'), 'class="select-all" id="suplai_vaksin"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
             <?php echo form_hidden('vaksinId', ''); ?>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
@@ -134,15 +143,6 @@
                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                   </div>
                   <?php echo form_error('tanggal_capaian'); ?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-xs-12 col-sm-12">
-              <div class="form-group required">
-                <label for="suplai_vaksin" class="control-label"><b>Suplai Vaksin <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('suplai_vaksin', $list_suplai_vaksin, $this->input->post('suplai_vaksin'), 'class="select-all" id="suplai_vaksin"');?>
                 <div class="help-block"></div>
               </div>
             </div>
@@ -317,6 +317,9 @@
                                         '</div>');
                   $('#modalEntryForm').modal('toggle');
                   getDataList();
+                  setTimeout(function(){
+                    window.location.reload(1);
+                  }, 1000);
                 }
                 $('#frmEntry').waitMe('hide');
               }).fail(function() {

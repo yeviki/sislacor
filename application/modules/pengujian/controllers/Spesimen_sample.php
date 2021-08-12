@@ -6,24 +6,24 @@
  * @author Yogi "solop" Kaputra
  */
 
-class Pendataan extends SLP_Controller {
+class Spesimen_sample extends SLP_Controller {
 	private $_url  = '';
 
 	public function __construct()
 	{
 		parent::__construct();
-		$this->_url  = 'kasus/pendataan';
-		$this->load->model(array('Model_pendataan' => 'mPendataan', 'master/model_master' => 'mmas'));
+		$this->_url  = 'pengujian/spesimen-sample';
+		$this->load->model(array('Model_sample' => 'mPengujian', 'master/model_master' => 'mmas'));
 	}
 
 	public function index()
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
-    	$this->breadcrumb->add('Kasus', '#');
-		$this->breadcrumb->add('Pendataan Kasus', '#');
-		$this->session_info['page_name'] = "Pendataan Kasus";
-		$this->session_info['list_regency_id']         = $this->mmas->getDataRegency();
-    	$this->template->build('pendataan/vlist', $this->session_info);
+    	$this->breadcrumb->add('Pengujian', '#');
+		$this->breadcrumb->add('Spesimen Sample', '#');
+		$this->session_info['page_name'] = "Spesimen Sample";
+		$this->session_info['list_regency_id']  = $this->mmas->getDataRegency();
+    	$this->template->build('vpengujian/vlist', $this->session_info);
 	}
 
 	public function listview()
@@ -35,7 +35,7 @@ class Pendataan extends SLP_Controller {
 			$session = $this->app_loader->current_account();
 			if(isset($session)){
 				$param = $this->input->post('param',TRUE);
-		    	$dataList = $this->mPendataan->get_datatables($param);
+		    	$dataList = $this->mPengujian->get_datatables($param);
 				$no = $this->input->post('start');
 				foreach ($dataList as $key => $dl) {
 					$no++;
@@ -53,8 +53,8 @@ class Pendataan extends SLP_Controller {
 
 				$output = array(
 					"draw" => $this->input->post('draw'),
-					"recordsTotal" => $this->mPendataan->count_all(),
-					"recordsFiltered" => $this->mPendataan->count_filtered($param),
+					"recordsTotal" => $this->mPengujian->count_all(),
+					"recordsFiltered" => $this->mPengujian->count_filtered($param),
 					"data" => $data,
 				);
 			}
@@ -71,10 +71,10 @@ class Pendataan extends SLP_Controller {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
 			if(!empty($session)) {
-				if($this->mPendataan->validasiDataValue() == FALSE) {
+				if($this->mPengujian->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mPendataan->insertData();
+					$data = $this->mPengujian->insertData();
 					if($data['message'] == 'SUCCESS') {
 						$result = array('status' => 1, 'message' => 'Data kasus pada tanggal <b>'.$data['tanggal_kasus'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
@@ -95,7 +95,7 @@ class Pendataan extends SLP_Controller {
 			$csrfHash 		= $this->security->get_csrf_hash();
 			$id_kasus  = $this->input->post('vaksinId', TRUE);
 			if(!empty($id_kasus) AND !empty($session)) {
-				$data = $this->mPendataan->getDataDetail($this->encryption->decrypt($id_kasus));
+				$data = $this->mPengujian->getDataDetail($this->encryption->decrypt($id_kasus));
 				$row = array();
 				$row['id_kasus']			=	!empty($data) ? $data['id_kasus'] : '';
 				$row['total_positif']		=	!empty($data) ? $data['total_positif'] : '';
@@ -120,10 +120,10 @@ class Pendataan extends SLP_Controller {
 			$csrfHash = $this->security->get_csrf_hash();
 			$id_kasus  = $this->input->post('vaksinId', TRUE);
 			if(!empty($session) AND !empty($id_kasus)) {
-				if($this->mPendataan->validasiDataValue() == FALSE) {
+				if($this->mPengujian->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mPendataan->updateData();
+					$data = $this->mPengujian->updateData();
 					if($data['message'] == 'NODATA') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
@@ -146,7 +146,7 @@ class Pendataan extends SLP_Controller {
 			$csrfHash 		= $this->security->get_csrf_hash();
 			$id_kasus 	= escape($this->input->post('vaksinId', TRUE));
 			if(!empty($session) AND !empty($id_kasus)) {
-				$data = $this->mPendataan->deleteData();
+				$data = $this->mPengujian->deleteData();
 				if($data['message'] == 'ERROR') {
 					$result = array('status' => 0, 'message' => 'Proses delete data gagal dikarenakan data tidak ditemukan...', 'csrfHash' => $csrfHash);
 				}	else if($data['message'] == 'SUCCESS') {

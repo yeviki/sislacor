@@ -24,7 +24,7 @@ class Pemakaian_tabung extends SLP_Controller {
 		$this->session_info['list_pemakaian_tabung']   	= $this->mmas->getDataStokTabung();
         $this->session_info['list_id_kat_tabung']   	= $this->mmas->getDataKatTabung();
 		$this->session_info['list_id_rs']   			= $this->mmas->getDataMasterHospital();
-		$this->session_info['page_name'] = "Pemakaian Tabung";
+		$this->session_info['page_name'] = "Pemakaian Oksigen";
 
     	$this->template->build('pemakaian_tabung/vlist', $this->session_info);
 	}
@@ -45,9 +45,9 @@ class Pemakaian_tabung extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal_pemakaian'];
-							$row[] = format_ribuan($dl['total_terpakai']);
 							$row[] = rujukan($dl['id_rs']);
 							$row[] = tabung($dl['id_kat_tabung']);
+							$row[] = format_ribuan($dl['total_terpakai']);
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_pemakaian_tabung']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_pemakaian_tabung']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;

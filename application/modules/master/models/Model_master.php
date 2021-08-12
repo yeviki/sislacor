@@ -240,28 +240,27 @@ class Model_master extends CI_Model
 
   public function getDataSuplai()
   {
-		$this->db->select('a.id_suplai_vaksin,
-								a.total_suplai,
-								a.id_jenis_vaksin,
-								a.id_penyalur,
-								a.tanggal_suplai,
-								a.regency_id,
-								a.create_by,
-								a.create_date,
-								a.create_ip,
-								a.mod_by,
-								a.mod_date,
-								a.mod_ip,
-								b.nm_vaksin,
-								c.nm_penyalur
+		$this->db->select('DISTINCT(a.id_jenis_vaksin), a.regency_id,
+                      ((SELECT SUM(b.total_suplai) FROM ta_suplai_vaksin b WHERE b.regency_id = a.regency_id AND b.id_jenis_vaksin = a.id_jenis_vaksin) -
+                      IFNULL ((SELECT SUM(c.total_vaksinasi) FROM ta_capaian_vaksin c, ta_suplai_vaksin d WHERE c.id_suplai_vaksin = d.id_suplai_vaksin AND d.regency_id = a.regency_id AND d.id_jenis_vaksin = a.id_jenis_vaksin),0)) AS total_suplai,
+                      a.id_suplai_vaksin,
+                      a.id_jenis_vaksin,
+                      a.id_penyalur,
+                      a.tanggal_suplai,
+                      a.regency_id,
+                      e.nm_vaksin,
+                      f.nm_penyalur
 								');
-		$this->db->join('ref_jenis_vaksin b', 'b.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
-		$this->db->join('ref_penyalur c', 'c.id_penyalur = a.id_penyalur', 'inner');
-		$query = $this->db->get('ta_suplai_vaksin a');
+		$this->db->join('ref_jenis_vaksin e', 'e.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
+    $this->db->join('ref_penyalur f', 'f.id_penyalur = a.id_penyalur', 'inner');
+    $this->db->group_by('a.regency_id');
+    $this->db->group_by('a.id_jenis_vaksin');
+    $query = $this->db->get('ta_suplai_vaksin a');
+    // echo $this->db->last_query();die;
     $dd_suplai_vaksin[''] = 'Pilih Suplai';
     if ($query->num_rows() > 0) {
       foreach ($query->result_array() as $row) {
-        $dd_suplai_vaksin[$row['id_suplai_vaksin']] = format_ribuan($row['total_suplai']).' - '.regency($row['regency_id']);
+        $dd_suplai_vaksin[$row['id_suplai_vaksin']] = regency($row['regency_id']) .' - '. $row['nm_vaksin'] .' - '. format_ribuan($row['total_suplai']);
       }
     }
     return $dd_suplai_vaksin;
@@ -282,21 +281,28 @@ class Model_master extends CI_Model
 
   public function getDataStokKamar()
   {
-		$this->db->select('a.id_rs_kamar,
-								a.total_kamar,
-								a.id_rs,
-								a.id_kat_kamar,
-								a.tanggal,
-								b.fullname,
-								c.nm_kamar
+    $this->db->select('DISTINCT(a.id_kat_kamar), a.id_rs,
+                      ((SELECT SUM(b.total_kamar) FROM ta_rs_kamar b WHERE b.id_rs = a.id_rs AND b.id_kat_kamar = a.id_kat_kamar) - 
+                      IFNULL ((SELECT SUM(c.total_terpakai) 
+                      FROM ta_pemakaian_kamar c, ta_rs_kamar d 
+                      WHERE c.id_rs_kamar=d.id_rs_kamar AND d.id_rs=a.id_rs ), 0)) AS total_kamar,
+                      a.id_rs_kamar,
+                      a.id_rs,
+                      a.id_kat_kamar,
+                      a.tanggal,
+                      c.fullname,
+                      d.nm_kamar
 								');
-		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
-		$this->db->join('ref_kat_kamar c', 'c.id_kat_kamar = a.id_kat_kamar', 'inner');
-		$query = $this->db->get('ta_rs_kamar a');
-    $dd_kamar[''] = 'Pilih Kamar';
+		$this->db->join('ms_rs_rujukan c', 'a.id_rs = c.id_rs', 'inner');
+    $this->db->join('ref_kat_kamar d', 'd.id_kat_kamar = a.id_kat_kamar', 'inner');
+    $this->db->group_by('a.id_rs');
+    $this->db->group_by('a.id_kat_kamar');
+    $query = $this->db->get('ta_rs_kamar a');
+    // echo $this->db->last_query();die;
+    $dd_kamar[''] = 'Pilih RS Kamar';
     if ($query->num_rows() > 0) {
       foreach ($query->result_array() as $row) {
-        $dd_kamar[$row['id_rs_kamar']] = format_ribuan($row['total_kamar']) .' - '. $row['nm_kamar'] .' - '. $row['fullname'];
+        $dd_kamar[$row['id_rs_kamar']] = $row['fullname'] .' - '. $row['nm_kamar'] .' - '. format_ribuan($row['total_kamar']);
       }
     }
     return $dd_kamar;
@@ -318,18 +324,25 @@ class Model_master extends CI_Model
 
   public function getDataStokTabung()
   {
-		$this->db->select('a.id_stok_tabung,
-								a.total_stok_tabung,
-								a.id_rs,
-								a.id_kat_tabung,
-								a.tanggal,
-								b.fullname,
-								c.nm_tabung
+    $this->db->select('DISTINCT(a.id_kat_tabung), a.id_rs,
+                      ((SELECT SUM(b.total_stok_tabung) FROM ta_stok_tabung b WHERE b.id_rs = a.id_rs AND b.id_kat_tabung = a.id_kat_tabung) - 
+                      IFNULL ((SELECT SUM(c.total_terpakai) 
+                      FROM ta_pemakaian_tabung c, ta_stok_tabung d 
+                      WHERE c.id_stok_tabung=d.id_stok_tabung AND d.id_rs=a.id_rs ), 0)) AS total_stok_tabung,
+                      a.id_stok_tabung,
+                      a.id_rs,
+                      a.id_kat_tabung,
+                      a.tanggal,
+                      e.fullname,
+                      f.nm_tabung
 								');
-		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
-		$this->db->join('ref_kat_tabung c', 'c.id_kat_tabung = a.id_kat_tabung', 'inner');
-		$query = $this->db->get('ta_stok_tabung a');
-    $dd_kamar[''] = 'Pilih Kamar';
+		$this->db->join('ms_rs_rujukan e', 'a.id_rs = e.id_rs', 'inner');
+    $this->db->join('ref_kat_tabung f', 'f.id_kat_tabung = a.id_kat_tabung', 'inner');
+    $this->db->group_by('a.id_rs');
+    $this->db->group_by('a.id_kat_tabung');
+    $query = $this->db->get('ta_stok_tabung a');
+    // echo $this->db->last_query();die;
+    $dd_kamar[''] = 'Pilih Tabung';
     if ($query->num_rows() > 0) {
       foreach ($query->result_array() as $row) {
         $dd_kamar[$row['id_stok_tabung']] = format_ribuan($row['total_stok_tabung']) .' - '. $row['nm_tabung'] .' - '. $row['fullname'];

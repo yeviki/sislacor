@@ -12,7 +12,7 @@ class Pemakaian_kamar extends SLP_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->_url  = 'kamar/pemakaian_kamar';
+		$this->_url  = 'kamar/pemakaian-kamar';
 		$this->load->model(array('Model_pemakaian_kamar' => 'mPemakaianKamar', 'master/model_master' => 'mmas'));
 	}
 
@@ -45,9 +45,9 @@ class Pemakaian_kamar extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal_pemakaian'];
-							$row[] = format_ribuan($dl['total_terpakai']);
 							$row[] = rujukan($dl['id_rs']);
 							$row[] = kamar($dl['id_kat_kamar']);
+							$row[] = format_ribuan($dl['total_terpakai']);
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_pemakaian_kamar']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_pemakaian_kamar']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;

@@ -412,8 +412,13 @@ $config['sess_regenerate_destroy'] = TRUE;
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
-$config['cookie_httponly'] 	= FALSE;
+// Aktifkan Jika Aplikasi Dalam Development
+// $config['cookie_secure']	= FALSE;
+// $config['cookie_httponly'] 	= FALSE;
+
+// Aktifkan Jika Aplikasi Sudah Rilis/Production
+$config['cookie_secure']	= TRUE;
+$config['cookie_httponly'] 	= TRUE;
 
 /*
 |--------------------------------------------------------------------------

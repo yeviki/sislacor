@@ -45,9 +45,9 @@ class Vaksin_masuk extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal_masuk'];
-							$row[] = format_ribuan($dl['total_stok']);
-							$row[] = $dl['nm_vaksin'];
 							$row[] = $dl['nm_penyalur'];
+							$row[] = $dl['nm_vaksin'];
+							$row[] = format_ribuan($dl['total_stok']);
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_stok_masuk']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_stok_masuk']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;

@@ -92,9 +92,9 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal</th>
-                  <th width="17%">Total Kamar</th>
                   <th width="17%">Rumah Sakit</th>
                   <th width="17%">Kategori</th>
+                  <th width="17%">Total Kamar</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -117,6 +117,22 @@
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group required">
+                <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all" id="id_rs"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group required">
+                <label for="id_kat_kamar" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('id_kat_kamar', $list_id_kat_kamar, $this->input->post('id_kat_kamar'), 'class="select-all" id="id_kat_kamar"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
             <?php echo form_hidden('vaksinId', ''); ?>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
@@ -133,22 +149,6 @@
                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                   </div>
                   <?php echo form_error('tanggal'); ?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-xs-12 col-sm-12">
-              <div class="form-group required">
-                <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all" id="id_rs"');?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-12">
-              <div class="form-group required">
-                <label for="id_kat_kamar" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('id_kat_kamar', $list_id_kat_kamar, $this->input->post('id_kat_kamar'), 'class="select-all" id="id_kat_kamar"');?>
                 <div class="help-block"></div>
               </div>
             </div>

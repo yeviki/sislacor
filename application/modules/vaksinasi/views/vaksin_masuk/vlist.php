@@ -92,9 +92,9 @@
                 <tr>
                   <th width="3%">#</th>
                   <th width="17%">Tanggal</th>
-                  <th width="17%">Total Stok</th>
-                  <th width="17%">Jenis Vaksin</th>
                   <th width="17%">Penyalur</th>
+                  <th width="17%">Jenis Vaksin</th>
+                  <th width="17%">Total Stok</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -118,10 +118,10 @@
         <div id="errEntry"></div>
           <div class="row">
             <?php echo form_hidden('vaksinId', ''); ?>
-            <div class="col-xs-12 col-sm-6">
+            <div class="col-xs-12 col-sm-12">
               <div class="form-group required">
-                <label for="total_stok" class="control-label" style="font-size:15px;"><b>Total Stok <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_stok" id="total_stok" placeholder="Total" value="<?php echo $this->input->post('total_stok', TRUE); ?>">
+                <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all" id="penyalur"');?>
                 <div class="help-block"></div>
               </div>
             </div>
@@ -147,8 +147,8 @@
             </div>
             <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all" id="penyalur"');?>
+                <label for="total_stok" class="control-label" style="font-size:15px;"><b>Total Vaksin <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_stok" id="total_stok" placeholder="Total" value="<?php echo $this->input->post('total_stok', TRUE); ?>">
                 <div class="help-block"></div>
               </div>
             </div>

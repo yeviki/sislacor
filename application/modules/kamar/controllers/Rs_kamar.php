@@ -44,9 +44,9 @@ class Rs_kamar extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal'];
-							$row[] = format_ribuan($dl['total_kamar']);
 							$row[] = rujukan($dl['id_rs']);
 							$row[] = kamar($dl['id_kat_kamar']);
+							$row[] = format_ribuan($dl['total_kamar']);
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_rs_kamar']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
 					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_rs_kamar']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;

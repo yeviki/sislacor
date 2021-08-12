@@ -38,15 +38,8 @@
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group required">
-                    <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all"');?>
-                    <div class="help-block"></div>
-                  </div>
-                </div>
-                <div class="col-xs-12 col-sm-3">
-                  <div class="form-group required">
-                    <label for="id_tabung" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('id_tabung', $list_id_kat_tabung, $this->input->post('id_tabung'), 'class="select-all" id="id_tabung"');?>
+                    <label for="regency_id" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('regency_id', $list_regency_id, $this->input->post('regency_id'), 'class="select-all" id="regency_id"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
@@ -83,7 +76,7 @@
     <div class="col-xs-12 col-sm-12">
       <div class="panel panel-green">
         <div class="panel-heading">
-          <h4>Data Pemakaian Oksigen</h4>
+          <h4>Data Kasus Spesimen</h4>
         </div>
         <div class="panel-body collapse in">
           <div class="table-responsive">
@@ -91,10 +84,11 @@
               <thead>
                 <tr>
                   <th width="3%">#</th>
-                  <th width="17%">Tanggal</th>
-                  <th width="17%">Rumah Sakit</th>
-                  <th width="17%">Kategori</th>
-                  <th width="17%">Total Tabung</th>
+                  <th width="17%">Tanggal Kasus</th>
+                  <th width="17%">Kab/Kota</th>
+                  <th width="17%">Total Sembuh</th>
+                  <th width="17%">Total Positif</th>
+                  <th width="17%">Total Meninggal</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -111,37 +105,54 @@
     <div class="modal-content">
       <div class="modal-header" style="padding:10px 15px 10px 15px;">
         <button type="button" class="close btnClose" aria-hidden="true">&times;</button>
-        <h4 class="modal-title"><b>FORM ENTRI PEMAKAIAN OKSIGEN</b></h4>
+        <h4 class="modal-title"><b>FORM ENTRI SPESIMEN</b></h4>
       </div>
-      <?php echo form_open(site_url('oksigen/pemakaian-tabung/create'), array('id' => 'formEntry')); ?>
+      <?php echo form_open(site_url('kasus/pendataan/create'), array('id' => 'formEntry')); ?>
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
-            <div class="col-xs-12 col-sm-12">
+            <?php echo form_hidden('vaksinId', ''); ?>
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="id_stok_tabung" class="control-label"><b> Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('id_stok_tabung', $list_pemakaian_tabung, $this->input->post('id_stok_tabung'), 'class="select-all" id="id_stok_tabung"');?>
+                <label for="total_positif" class="control-label" style="font-size:15px;"><b>Total Positif <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_positif" id="total_positif" placeholder="Total" value="<?php echo $this->input->post('total_positif', TRUE); ?>">
+                <div class="help-block"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="total_sembuh" class="control-label" style="font-size:15px;"><b>Total Sembuh <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_sembuh" id="total_sembuh" placeholder="Total" value="<?php echo $this->input->post('total_sembuh', TRUE); ?>">
+                <div class="help-block"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="total_meninggal" class="control-label" style="font-size:15px;"><b>Total Meninggal <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_meninggal" id="total_meninggal" placeholder="Total" value="<?php echo $this->input->post('total_meninggal', TRUE); ?>">
+                <div class="help-block"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="tanggal_kasus" class="control-label"><b>Tanggal Kasus<font color="red" size="1em">(*)</font></b></label>
+                  <div class="input-group date datemonth">
+                    <input type="text" class="form-control mask" name="tanggal_kasus" id="tanggal_kasus" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_kasus', TRUE); ?>">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <?php echo form_error('tanggal_kasus'); ?>
                 <div class="help-block"></div>
               </div>
             </div>
           </div>
           <div class="row">
-            <?php echo form_hidden('vaksinId', ''); ?>
-            <div class="col-xs-12 col-sm-6">
+            <div class="col-xs-12 col-sm-12">
               <div class="form-group required">
-                <label for="total_terpakai" class="control-label" style="font-size:15px;"><b>Total Pemakaian <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_terpakai" id="total_terpakai" placeholder="Total" value="<?php echo $this->input->post('total_terpakai', TRUE); ?>">
-                <div class="help-block"></div>
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="tanggal_pemakaian" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
-                  <div class="input-group date datemonth">
-                    <input type="text" class="form-control mask" name="tanggal_pemakaian" id="tanggal_pemakaian" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_pemakaian', TRUE); ?>">
-                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                  </div>
-                  <?php echo form_error('tanggal_pemakaian'); ?>
+                <label for="regency_id" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('regency_id', $list_regency_id, $this->input->post('regency_id'), 'class="select-all" id="regency_id"');?>
                 <div class="help-block"></div>
               </div>
             </div>
@@ -214,7 +225,7 @@
       "serverSide": true,
       "ordering": false,
       "ajax": {
-        "url": site + "oksigen/pemakaian-tabung/listview",
+        "url": site + "kasus/pendataan/listview",
         "type": "POST",
         "data": {
           "param" : $('#formFilter').serializeArray(),
@@ -251,7 +262,7 @@
   });
 
   function formReset() {
-    $('#formEntry').attr('action', site + 'oksigen/pemakaian-tabung/create');
+    $('#formEntry').attr('action', site + 'kasus/pendataan/create');
     $('#errEntry').html('');
     $('.select-all').select2('val', '');
     $('#status').select2('val', 1);
@@ -316,9 +327,6 @@
                                         '</div>');
                   $('#modalEntryForm').modal('toggle');
                   getDataList();
-                  setTimeout(function(){
-                    window.location.reload(1);
-                  }, 1000);
                 }
                 $('#frmEntry').waitMe('hide');
               }).fail(function() {
@@ -339,28 +347,30 @@
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
-    $('#formEntry').attr('action', site + 'oksigen/pemakaian-tabung/update');
-    var id_pemakaian_tabung = $(this).data('id');
+    $('#formEntry').attr('action', site + 'kasus/pendataan/update');
+    var id_kasus = $(this).data('id');
     $('#modalEntryForm').modal({
       backdrop: 'static'
     });
-    getDataTabung(id_pemakaian_tabung);
+    getDataTabung(id_kasus);
   });
 
-  function getDataTabung(id_pemakaian_tabung) {
+  function getDataTabung(id_kasus) {
     run_waitMe($('#frmEntry'));
     $.ajax({
       type: 'POST',
-      url: site + 'oksigen/pemakaian-tabung/details',
-      data: {'vaksinId' : id_pemakaian_tabung, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
+      url: site + 'kasus/pendataan/details',
+      data: {'vaksinId' : id_kasus, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
       dataType: 'json',
       success: function(data) {
         $('input[name="'+csrfName+'"]').val(data.csrfHash);
         if(data.status == 1) {
-          $('input[name="vaksinId"]').val(id_pemakaian_tabung);
-          $('#total_terpakai').val(data.message.total_terpakai);
-          $('#tanggal_pemakaian').val(data.message.tanggal_pemakaian);
-          $('#id_stok_tabung').select2('val', data.message.id_stok_tabung).trigger('change');
+          $('input[name="vaksinId"]').val(id_kasus);
+          $('#total_positif').val(data.message.total_positif);
+          $('#total_sembuh').val(data.message.total_sembuh);
+          $('#total_meninggal').val(data.message.total_meninggal);
+          $('#tanggal_kasus').val(data.message.tanggal_kasus);
+          $('#regency_id').select2('val', data.message.regency_id).trigger('change');
         }
         $('#frmEntry').waitMe('hide');
       }
@@ -397,7 +407,7 @@
           callback:function(response){
             if (response) {
               $.ajax({
-                url: site + 'oksigen/pemakaian-tabung/delete',
+                url: site + 'kasus/pendataan/delete',
                 type: "POST",
                 data: postData,
                 dataType: "json",
@@ -436,5 +446,7 @@
       return false;
     }
   });
+
+  
 
 </script>
