@@ -16,10 +16,10 @@ class Model_sample extends CI_Model
 
 	public function validasiDataValue()
 	{
-		$this->form_validation->set_rules('total_positif', 'Total Positif', 'required|trim');
-		$this->form_validation->set_rules('total_sembuh', 'Total Sembuh', 'required|trim');
-		$this->form_validation->set_rules('total_meninggal', 'Total Meninggal', 'required|trim');
-		$this->form_validation->set_rules('tanggal_kasus', 'Tanggal Kasus', 'required|trim');
+		$this->form_validation->set_rules('total_spesimen', 'Total Spesimen', 'required|trim');
+		$this->form_validation->set_rules('total_pemeriksaan', 'Total Pemeriksaan', 'required|trim');
+		$this->form_validation->set_rules('regency_id', 'Kab/Kota', 'required|trim');
+		$this->form_validation->set_rules('tanggal_spesimen', 'Tanggal Spesimen', 'required|trim');
   		validation_message_setting();
 		if ($this->form_validation->run() == FALSE)
 			return false;
@@ -46,14 +46,14 @@ class Model_sample extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select('a.id_kasus,
-								a.total_positif,
-								a.total_sembuh,
-								a.total_meninggal,
-								a.tanggal_kasus,
+		$this->db->select('a.id_spesimen_sample,
+								a.total_spesimen,
+								a.total_pemeriksaan,
+								a.regency_id,
+								a.tanggal_spesimen,
 								a.regency_id
 								');
-		return $this->db->count_all_results('ta_kasus a');
+		return $this->db->count_all_results('ta_spesimen_sample a');
 	}
 
 	private function _get_datatables_query($param)
@@ -64,21 +64,21 @@ class Model_sample extends CI_Model
 				$post[$v['name']] = $v['value'];
 			}
 		}
-		$this->db->select('a.id_kasus,
-								a.total_positif,
-								a.total_sembuh,
-								a.total_meninggal,
-								a.tanggal_kasus,
+		$this->db->select('a.id_spesimen_sample,
+								a.total_spesimen,
+								a.total_pemeriksaan,
+								a.regency_id,
+								a.tanggal_spesimen,
 								a.regency_id
 								');
-		$this->db->from('ta_kasus a');
+		$this->db->from('ta_spesimen_sample a');
 		
 		// Kab/Kota
-		if(isset($post['regency_id']) AND $post['regency_id'] != '')
-			$this->db->where('a.regency_id', $post['regency_id']);
-		// Tanggal kasus Masuk
+		if(isset($post['regency']) AND $post['regency'] != '')
+			$this->db->where('a.regency_id', $post['regency']);
+		// Tanggal
         if(isset($post['tanggal']) AND $post['tanggal'] != ''){
-			$this->db->where('DATE_FORMAT(a.tanggal_kasus, "%m/%d/%Y")', $post['tanggal']);
+			$this->db->where('DATE_FORMAT(a.tanggal_spesimen, "%m/%d/%Y")', $post['tanggal']);
 		}
 		
 		$i = 0;
@@ -96,14 +96,14 @@ class Model_sample extends CI_Model
 			}
 		$i++;
 		}
-		$this->db->order_by('a.tanggal_kasus DESC');
-		$this->db->order_by('a.id_kasus DESC');
+		$this->db->order_by('a.tanggal_spesimen DESC');
+		$this->db->order_by('a.id_spesimen_sample DESC');
   	}
 
-	public function getDataDetail($id_kasus)
+	public function getDataDetail($id_spesimen_sample)
 	{
-		$this->db->where('id_kasus', $id_kasus);
-		$query = $this->db->get('ta_kasus');
+		$this->db->where('id_spesimen_sample', $id_spesimen_sample);
+		$query = $this->db->get('ta_spesimen_sample');
 		return $query->row_array();
 	}
 
@@ -114,49 +114,48 @@ class Model_sample extends CI_Model
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
 
-		$tanggal_kasus	= date_convert(escape($this->input->post('tanggal_kasus', TRUE)));
+		$tanggal_spesimen	= date_convert(escape($this->input->post('tanggal_spesimen', TRUE)));
 
 			$data = array(
-				'tanggal_kasus'			=> $tanggal_kasus,
-				'total_positif'			=> escape($this->input->post('total_positif', TRUE)),
-				'total_sembuh'			=> escape($this->input->post('total_sembuh', TRUE)),
-				'total_meninggal'		=> escape($this->input->post('total_meninggal', TRUE)),
+				'tanggal_spesimen'		=> $tanggal_spesimen,
+				'total_spesimen'		=> escape($this->input->post('total_spesimen', TRUE)),
+				'total_pemeriksaan'		=> escape($this->input->post('total_pemeriksaan', TRUE)),
+				'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
 				'regency_id'			=> escape($this->input->post('regency_id', TRUE))
 			);
-			$this->db->insert('ta_kasus', $data);
-			return array('message'=>'SUCCESS', 'tanggal_kasus'=>$tanggal_kasus);
+			$this->db->insert('ta_spesimen_sample', $data);
+			return array('message'=>'SUCCESS', 'tanggal_spesimen'=>$tanggal_spesimen);
 	}
 
 	public function updateData()
 	{
-		$create_by    		= $this->app_loader->current_account();
-		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
-		$create_ip    		= $this->input->ip_address();
-		$id_kasus		= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$create_by    			= $this->app_loader->current_account();
+		$create_date 			= gmdate('Y-m-d H:i:s', time()+60*60*7);
+		$create_ip    			= $this->input->ip_address();
+		$id_spesimen_sample		= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
 		//cek data
-		$dataD 	    = $this->getDataDetail($id_kasus);
-		$tanggal_kasus  = !empty($dataD) ? $dataD['tanggal_kasus'] : '';
+		$dataD 	    = $this->getDataDetail($id_spesimen_sample);
+		$tanggal_spesimen  = !empty($dataD) ? $dataD['tanggal_spesimen'] : '';
 		if(count($dataD) <= 0)
-			return array('message'=>'ERROR', 'tanggal_kasus'=>$tanggal_kasus);
+			return array('message'=>'ERROR', 'tanggal_spesimen'=>$tanggal_spesimen);
 		else {
 				$data = array(
-					'tanggal_kasus'			=> date_convert(escape($this->input->post('tanggal_kasus', TRUE))),
-					'total_positif'			=> escape($this->input->post('total_positif', TRUE)),
-					'total_sembuh'			=> escape($this->input->post('total_sembuh', TRUE)),
-					'total_meninggal'		=> escape($this->input->post('total_meninggal', TRUE)),
+					'tanggal_spesimen'		=> date_convert(escape($this->input->post('tanggal_spesimen', TRUE))),
+					'total_spesimen'		=> escape($this->input->post('total_spesimen', TRUE)),
+					'total_pemeriksaan'		=> escape($this->input->post('total_pemeriksaan', TRUE)),
 					'regency_id'			=> escape($this->input->post('regency_id', TRUE))
 				);
-			$this->db->where('id_kasus', $id_kasus);
-			$this->db->update('ta_kasus', $data);
-			return array('message'=>'SUCCESS', 'tanggal_kasus'=>$tanggal_kasus);
+			$this->db->where('id_spesimen_sample', $id_spesimen_sample);
+			$this->db->update('ta_spesimen_sample', $data);
+			return array('message'=>'SUCCESS', 'tanggal_spesimen'=>$tanggal_spesimen);
 		}
 	}
 
 	public function deleteData()
 	{
-		$id_kasus	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
-		$this->db->where('id_kasus', $id_kasus);
-		$this->db->delete('ta_kasus');
+		$id_spesimen_sample	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$this->db->where('id_spesimen_sample', $id_spesimen_sample);
+		$this->db->delete('ta_spesimen_sample');
 		return array('message'=>'SUCCESS');
 		
 	}

@@ -413,12 +413,12 @@ $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
 // Aktifkan Jika Aplikasi Dalam Development
-// $config['cookie_secure']	= FALSE;
-// $config['cookie_httponly'] 	= FALSE;
+$config['cookie_secure']	= FALSE;
+$config['cookie_httponly'] 	= FALSE;
 
 // Aktifkan Jika Aplikasi Sudah Rilis/Production
-$config['cookie_secure']	= TRUE;
-$config['cookie_httponly'] 	= TRUE;
+// $config['cookie_secure']	= TRUE;
+// $config['cookie_httponly'] 	= TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -483,7 +483,8 @@ $config['csrf_exclude_uris'] = array( 'manajemen/users/listview','otg/listview',
                                       'kamar/pemakaian-kamar/listview',
                                       'oksigen/stok-tabung/listview',
                                       'oksigen/pemakaian-tabung/listview',
-                                      'kasus/pendataan/listview'
+                                      'kasus/pendataan/listview',
+                                      'pengujian/spesimen-sample/listview'
                                     );
 /*
 |--------------------------------------------------------------------------

@@ -1,0 +1,99 @@
+SELECT `a`.`id_suplai_vaksin`, 
+(SELECT (SUM(x.total_suplai) - d.total_vaksinasi ) FROM ta_suplai_vaksin x WHERE x.id_jenis_vaksin = a.id_jenis_vaksin AND x.regency_id = a.regency_id ) 
+as total_suplai, 
+`a`.`id_jenis_vaksin`,
+ `a`.`id_penyalur`, 
+ `a`.`tanggal_suplai`, 
+ `a`.`regency_id`, 
+ `a`.`create_by`, 
+ `a`.`create_date`, 
+ `a`.`create_ip`, 
+ `a`.`mod_by`, 
+ `a`.`mod_date`, 
+ `a`.`mod_ip`, 
+ `b`.`nm_vaksin`, 
+ `c`.`nm_penyalur` 
+ FROM `ta_suplai_vaksin` `a` 
+ INNER JOIN `ref_jenis_vaksin` `b` ON `b`.`id_jenis_vaksin` = `a`.`id_jenis_vaksin` 
+ INNER JOIN `ref_penyalur` `c` ON `c`.`id_penyalur` = `a`.`id_penyalur`
+ RIGHT JOIN ta_capaian_vaksin d  ON a.id_suplai_vaksin=d.id_suplai_vaksin 
+ GROUP BY `a`.`regency_id`, `a`.`id_jenis_vaksin`;
+ 
+ 
+ select
+ DISTINCT(a.id_jenis_vaksin), a.regency_id,
+ ((SELECT SUM(b.total_suplai) FROM ta_suplai_vaksin b WHERE b.regency_id = a.regency_id AND b.id_jenis_vaksin = a.id_jenis_vaksin) -
+ (SELECT SUM(c.total_vaksinasi) FROM ta_capaian_vaksin c, ta_suplai_vaksin d WHERE c.id_suplai_vaksin=d.id_suplai_vaksin AND d.regency_id=a.regency_id AND d.id_jenis_vaksin=a.id_jenis_vaksin))
+ from
+ ta_suplai_vaksin a
+ where
+ a.regency_id = "13.06";
+
+
+
+
+ SELECT 
+DISTINCT(a.id_kat_tabung), `a`.`id_rs`, ((SELECT SUM(b.total_stok_tabung) 
+FROM ta_stok_tabung b WHERE b.id_rs = a.id_rs AND b.id_kat_tabung = a.id_kat_tabung) - 
+IFNULL((SELECT SUM(c.total_terpakai) FROM ta_pemakaian_tabung c, ta_stok_tabung d 
+WHERE c.id_rs = d.id_rs 
+AND d.id_rs = a.id_rs 
+AND d.id_kat_tabung = a.id_kat_tabung),0)) 
+AS total_stok_tabung, 
+`a`.`id_stok_tabung`, 
+`a`.`id_rs`, 
+`a`.`id_kat_tabung`, 
+`a`.`tanggal`, 
+`c`.`fullname`, 
+`d`.`nm_tabung` 
+FROM `ta_stok_tabung` `a` 
+INNER JOIN `ms_rs_rujukan` `c` ON `a`.`id_rs` = `c`.`id_rs` 
+INNER JOIN `ref_kat_tabung` `d` ON `d`.`id_kat_tabung` = `a`.`id_kat_tabung`
+
+
+
+
+
+SELECT 
+DISTINCT(a.id_kat_tabung), `a`.`id_rs`, 
+
+((SELECT SUM(b.total_stok_tabung) FROM ta_stok_tabung b WHERE b.id_rs = a.id_rs AND b.id_kat_tabung = a.id_kat_tabung) - 
+IFNULL ((SELECT SUM(c.total_terpakai) 
+FROM ta_pemakaian_tabung c, ta_stok_tabung d 
+WHERE c.id_stok_tabung=d.id_stok_tabung AND d.id_rs=a.id_rs ), 0)) AS total_stok_tabung, 
+`a`.`id_stok_tabung`, `a`.`id_rs`, `a`.`id_kat_tabung`, `a`.`tanggal`, `c`.`fullname`, `d`.`nm_tabung` 
+FROM `ta_stok_tabung` `a` 
+INNER JOIN `ms_rs_rujukan` `c` ON `a`.`id_rs` = `c`.`id_rs` 
+INNER JOIN `ref_kat_tabung` `d` ON `d`.`id_kat_tabung` = `a`.`id_kat_tabung` 
+GROUP BY `a`.`id_rs`, `a`.`id_kat_tabung`
+
+
+
+SELECT DISTINCT(a.id_kat_tabung), `a`.`id_rs`, ((SELECT SUM(b.total_stok_tabung) FROM ta_stok_tabung b WHERE b.id_rs = a.id_rs AND b.id_kat_tabung = a.id_kat_tabung) - IFNULL ((SELECT SUM(c.total_terpakai) FROM ta_pemakaian_tabung c, ta_stok_tabung d WHERE d.id_rs = a.id_rs AND d.id_kat_tabung = a.id_kat_tabung), 0)) AS total_stok_tabung, `a`.`id_stok_tabung`, `a`.`id_rs`, `a`.`id_kat_tabung`, `a`.`tanggal`, `e`.`fullname`, `f`.`nm_tabung` FROM `ta_stok_tabung` `a` INNER JOIN `ms_rs_rujukan` `e` ON `a`.`id_rs` = `e`.`id_rs` INNER JOIN `ref_kat_tabung` `f` ON `f`.`id_kat_tabung` = `a`.`id_kat_tabung` GROUP BY `a`.`id_rs`, `a`.`id_kat_tabung`
+
+
+
+SELECT DISTINCT(a.id_kat_kamar), `a`.`id_rs`, ((SELECT SUM(b.total_kamar) FROM ta_rs_kamar b WHERE b.id_rs = a.id_rs AND b.id_kat_kamar = a.id_kat_kamar) - (SELECT SUM(c.total_terpakai) FROM ta_pemakaian_kamar c, ta_rs_kamar d WHERE c.id_rs = d.id_rs AND d.id_rs = a.id_rs AND d.id_kat_kamar = a.id_kat_kamar)) AS total_kamar, `a`.`id_rs_kamar`, `a`.`total_kamar`, `a`.`id_rs`, `a`.`id_kat_kamar`, `a`.`tanggal`, `c`.`fullname`, `d`.`nm_kamar` FROM `ta_rs_kamar` `a` INNER JOIN `ms_rs_rujukan` `c` ON `a`.`id_rs` = `c`.`id_rs` INNER JOIN `ref_kat_kamar` `d` ON `d`.`id_kat_kamar` = `a`.`id_kat_kamar`
+
+SELECT 
+DISTINCT(a.id_jenis_vaksin), `a`.`regency_id`, 
+((SELECT SUM(b.total_suplai) FROM ta_suplai_vaksin b
+WHERE b.regency_id = a.regency_id AND b.id_jenis_vaksin = a.id_jenis_vaksin) - 
+(SELECT SUM(c.total_vaksinasi) FROM ta_capaian_vaksin c, ta_suplai_vaksin d 
+WHERE c.id_suplai_vaksin = d.id_suplai_vaksin AND d.regency_id = a.regency_id AND d.id_jenis_vaksin = a.id_jenis_vaksin)) 
+AS total_suplai, 
+`a`.`id_jenis_vaksin`, 
+`a`.`id_penyalur`, 
+`a`.`tanggal_suplai`, 
+`a`.`regency_id`
+FROM `ta_suplai_vaksin` `a` 
+
+SELECT 
+	(SUM(A.total_suplai) - SUM(B.total_vaksinasi)) AS total_suplai,
+	A.total_suplai
+FROM 
+	ta_suplai_vaksin A 
+	LEFT JOIN ta_capaian_vaksin B ON A.id_suplai_vaksin = B.id_suplai_vaksin
+WHERE 
+	A.regency_id = '13.06'
+	AND A.id_jenis_vaksin = 1

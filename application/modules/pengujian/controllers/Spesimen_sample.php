@@ -13,7 +13,7 @@ class Spesimen_sample extends SLP_Controller {
 	{
 		parent::__construct();
 		$this->_url  = 'pengujian/spesimen-sample';
-		$this->load->model(array('Model_sample' => 'mPengujian', 'master/model_master' => 'mmas'));
+		$this->load->model(array('Model_sample' => 'mSpesimen', 'master/model_master' => 'mmas'));
 	}
 
 	public function index()
@@ -35,26 +35,25 @@ class Spesimen_sample extends SLP_Controller {
 			$session = $this->app_loader->current_account();
 			if(isset($session)){
 				$param = $this->input->post('param',TRUE);
-		    	$dataList = $this->mPengujian->get_datatables($param);
+		    	$dataList = $this->mSpesimen->get_datatables($param);
 				$no = $this->input->post('start');
 				foreach ($dataList as $key => $dl) {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal_kasus'];
+							$row[] = $dl['tanggal_spesimen'];
 							$row[] = regency($dl['regency_id']);
-							$row[] = $dl['total_sembuh'];
-							$row[] = $dl['total_positif'];
-							$row[] = $dl['total_meninggal'];
-					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_kasus']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_kasus']).'" title="Delete"><i class="fa fa-times"></i> </button>';
+							$row[] = $dl['total_spesimen'];
+							$row[] = $dl['total_pemeriksaan'];
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_spesimen_sample']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_spesimen_sample']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
 				$output = array(
 					"draw" => $this->input->post('draw'),
-					"recordsTotal" => $this->mPengujian->count_all(),
-					"recordsFiltered" => $this->mPengujian->count_filtered($param),
+					"recordsTotal" => $this->mSpesimen->count_all(),
+					"recordsFiltered" => $this->mSpesimen->count_filtered($param),
 					"data" => $data,
 				);
 			}
@@ -71,12 +70,12 @@ class Spesimen_sample extends SLP_Controller {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
 			if(!empty($session)) {
-				if($this->mPengujian->validasiDataValue() == FALSE) {
+				if($this->mSpesimen->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mPengujian->insertData();
+					$data = $this->mSpesimen->insertData();
 					if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data kasus pada tanggal <b>'.$data['tanggal_kasus'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data kasus pada tanggal <b>'.$data['tanggal_spesimen'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -93,15 +92,15 @@ class Spesimen_sample extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_kasus  = $this->input->post('vaksinId', TRUE);
-			if(!empty($id_kasus) AND !empty($session)) {
-				$data = $this->mPengujian->getDataDetail($this->encryption->decrypt($id_kasus));
+			$id_spesimen_sample  = $this->input->post('vaksinId', TRUE);
+			if(!empty($id_spesimen_sample) AND !empty($session)) {
+				$data = $this->mSpesimen->getDataDetail($this->encryption->decrypt($id_spesimen_sample));
 				$row = array();
-				$row['id_kasus']			=	!empty($data) ? $data['id_kasus'] : '';
-				$row['total_positif']		=	!empty($data) ? $data['total_positif'] : '';
-				$row['total_sembuh']		=	!empty($data) ? $data['total_sembuh'] : '';
-				$row['total_meninggal']		=	!empty($data) ? $data['total_meninggal'] : '';
-				$row['tanggal_kasus']		= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal_kasus'])) : '';
+				$row['id_spesimen_sample']		=	!empty($data) ? $data['id_spesimen_sample'] : '';
+				$row['regency_id']				=	!empty($data) ? $data['regency_id'] : '';
+				$row['total_pemeriksaan']		=	!empty($data) ? $data['total_pemeriksaan'] : '';
+				$row['total_spesimen']			=	!empty($data) ? $data['total_spesimen'] : '';
+				$row['tanggal_spesimen']		= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal_spesimen'])) : '';
 
 				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);
 			} else {
@@ -118,16 +117,16 @@ class Spesimen_sample extends SLP_Controller {
 		} else {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
-			$id_kasus  = $this->input->post('vaksinId', TRUE);
-			if(!empty($session) AND !empty($id_kasus)) {
-				if($this->mPengujian->validasiDataValue() == FALSE) {
+			$id_spesimen_sample  = $this->input->post('vaksinId', TRUE);
+			if(!empty($session) AND !empty($id_spesimen_sample)) {
+				if($this->mSpesimen->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
-					$data = $this->mPengujian->updateData();
+					$data = $this->mSpesimen->updateData();
 					if($data['message'] == 'NODATA') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data dengan tanggal kasus <b>'.$data['tanggal_kasus'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data dengan tanggal kasus <b>'.$data['tanggal_spesimen'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -144,9 +143,9 @@ class Spesimen_sample extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_kasus 	= escape($this->input->post('vaksinId', TRUE));
-			if(!empty($session) AND !empty($id_kasus)) {
-				$data = $this->mPengujian->deleteData();
+			$id_spesimen_sample 	= escape($this->input->post('vaksinId', TRUE));
+			if(!empty($session) AND !empty($id_spesimen_sample)) {
+				$data = $this->mSpesimen->deleteData();
 				if($data['message'] == 'ERROR') {
 					$result = array('status' => 0, 'message' => 'Proses delete data gagal dikarenakan data tidak ditemukan...', 'csrfHash' => $csrfHash);
 				}	else if($data['message'] == 'SUCCESS') {

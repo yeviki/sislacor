@@ -8,7 +8,7 @@
   <div class="row" id="formParent">    
     <div class="col-xs-12 col-sm-12">
       <div class="btn-toolbar" style="margin-bottom: 15px">
-        <a type="button" href="<?php echo site_url('vaksinasi/capaian-vaksin'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
+        <a type="button" href="<?php echo site_url('pengujian/spesimen-sample'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
           <button type="button" class="btn btn-primary-alt" id="btnAdd" style="padding:11px 16px;"><b><i class="fa fa-plus"></i> Tambah Baru</b></button>
       </div>
     </div>
@@ -84,11 +84,10 @@
               <thead>
                 <tr>
                   <th width="3%">#</th>
-                  <th width="17%">Tanggal Kasus</th>
+                  <th width="17%">Tanggal Spesimen</th>
                   <th width="17%">Kab/Kota</th>
-                  <th width="17%">Total Sembuh</th>
-                  <th width="17%">Total Positif</th>
-                  <th width="17%">Total Meninggal</th>
+                  <th width="17%">Total Spesimen</th>
+                  <th width="17%">Total Pemeriksaan</th>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -107,52 +106,44 @@
         <button type="button" class="close btnClose" aria-hidden="true">&times;</button>
         <h4 class="modal-title"><b>FORM ENTRI SPESIMEN</b></h4>
       </div>
-      <?php echo form_open(site_url('kasus/pendataan/create'), array('id' => 'formEntry')); ?>
+      <?php echo form_open(site_url('pengujian/spesimen-sample/create'), array('id' => 'formEntry')); ?>
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
-          <div class="row">
-            <?php echo form_hidden('vaksinId', ''); ?>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="total_positif" class="control-label" style="font-size:15px;"><b>Total Positif <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_positif" id="total_positif" placeholder="Total" value="<?php echo $this->input->post('total_positif', TRUE); ?>">
-                <div class="help-block"></div>
-              </div>
-            </div>
-
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="total_sembuh" class="control-label" style="font-size:15px;"><b>Total Sembuh <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_sembuh" id="total_sembuh" placeholder="Total" value="<?php echo $this->input->post('total_sembuh', TRUE); ?>">
-                <div class="help-block"></div>
-              </div>
-            </div>
-
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="total_meninggal" class="control-label" style="font-size:15px;"><b>Total Meninggal <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_meninggal" id="total_meninggal" placeholder="Total" value="<?php echo $this->input->post('total_meninggal', TRUE); ?>">
-                <div class="help-block"></div>
-              </div>
-            </div>
-
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="tanggal_kasus" class="control-label"><b>Tanggal Kasus<font color="red" size="1em">(*)</font></b></label>
-                  <div class="input-group date datemonth">
-                    <input type="text" class="form-control mask" name="tanggal_kasus" id="tanggal_kasus" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_kasus', TRUE); ?>">
-                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                  </div>
-                  <?php echo form_error('tanggal_kasus'); ?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-          </div>
           <div class="row">
             <div class="col-xs-12 col-sm-12">
               <div class="form-group required">
                 <label for="regency_id" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
                 <?php echo form_dropdown('regency_id', $list_regency_id, $this->input->post('regency_id'), 'class="select-all" id="regency_id"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <?php echo form_hidden('vaksinId', ''); ?>
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="total_spesimen" class="control-label" style="font-size:15px;"><b>Total Spesimen <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_spesimen" id="total_spesimen" placeholder="Total" value="<?php echo $this->input->post('total_spesimen', TRUE); ?>">
+                <div class="help-block"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="total_pemeriksaan" class="control-label" style="font-size:15px;"><b>Total Pemeriksaan <font color="red" size="1em">(*)</font></b></label>
+                <input type="text" class="form-control nominal" name="total_pemeriksaan" id="total_pemeriksaan" placeholder="Total" value="<?php echo $this->input->post('total_pemeriksaan', TRUE); ?>">
+                <div class="help-block"></div>
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="tanggal_spesimen" class="control-label"><b>Tanggal Spesimen<font color="red" size="1em">(*)</font></b></label>
+                  <div class="input-group date datemonth">
+                    <input type="text" class="form-control mask" name="tanggal_spesimen" id="tanggal_spesimen" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_spesimen', TRUE); ?>">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <?php echo form_error('tanggal_spesimen'); ?>
                 <div class="help-block"></div>
               </div>
             </div>
@@ -225,7 +216,7 @@
       "serverSide": true,
       "ordering": false,
       "ajax": {
-        "url": site + "kasus/pendataan/listview",
+        "url": site + "pengujian/spesimen-sample/listview",
         "type": "POST",
         "data": {
           "param" : $('#formFilter').serializeArray(),
@@ -262,7 +253,7 @@
   });
 
   function formReset() {
-    $('#formEntry').attr('action', site + 'kasus/pendataan/create');
+    $('#formEntry').attr('action', site + 'pengujian/spesimen-sample/create');
     $('#errEntry').html('');
     $('.select-all').select2('val', '');
     $('#status').select2('val', 1);
@@ -347,7 +338,7 @@
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
-    $('#formEntry').attr('action', site + 'kasus/pendataan/update');
+    $('#formEntry').attr('action', site + 'pengujian/spesimen-sample/update');
     var id_kasus = $(this).data('id');
     $('#modalEntryForm').modal({
       backdrop: 'static'
@@ -359,17 +350,16 @@
     run_waitMe($('#frmEntry'));
     $.ajax({
       type: 'POST',
-      url: site + 'kasus/pendataan/details',
+      url: site + 'pengujian/spesimen-sample/details',
       data: {'vaksinId' : id_kasus, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
       dataType: 'json',
       success: function(data) {
         $('input[name="'+csrfName+'"]').val(data.csrfHash);
         if(data.status == 1) {
           $('input[name="vaksinId"]').val(id_kasus);
-          $('#total_positif').val(data.message.total_positif);
-          $('#total_sembuh').val(data.message.total_sembuh);
-          $('#total_meninggal').val(data.message.total_meninggal);
-          $('#tanggal_kasus').val(data.message.tanggal_kasus);
+          $('#total_spesimen').val(data.message.total_spesimen);
+          $('#total_pemeriksaan').val(data.message.total_pemeriksaan);
+          $('#tanggal_spesimen').val(data.message.tanggal_spesimen);
           $('#regency_id').select2('val', data.message.regency_id).trigger('change');
         }
         $('#frmEntry').waitMe('hide');
@@ -407,7 +397,7 @@
           callback:function(response){
             if (response) {
               $.ajax({
-                url: site + 'kasus/pendataan/delete',
+                url: site + 'pengujian/spesimen-sample/delete',
                 type: "POST",
                 data: postData,
                 dataType: "json",

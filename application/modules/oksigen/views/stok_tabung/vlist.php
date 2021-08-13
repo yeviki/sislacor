@@ -8,7 +8,7 @@
   <div class="row" id="formParent">    
     <div class="col-xs-12 col-sm-12">
       <div class="btn-toolbar" style="margin-bottom: 15px">
-        <a type="button" href="<?php echo site_url('vaksinasi/capaian-vaksin'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
+        <a type="button" href="<?php echo site_url('oksigen/stok-tabung'); ?>" class="btn btn-inverse" name="button" style="padding:12px 16px;"><b><i class="fa fa-table"></i></b></a>
           <button type="button" class="btn btn-primary-alt" id="btnAdd" style="padding:11px 16px;"><b><i class="fa fa-plus"></i> Tambah Baru</b></button>
       </div>
     </div>
