@@ -42,7 +42,19 @@ class Model_vaksin extends CI_Model
 		return $query->result_array();
 	}
 
-    public function get_SuplaiVaksinKabKota()
+	public function get_KabKota()
+	{
+		$this->db->select('a.id,
+                            a.province_id,
+                            a.name
+                            ');
+		$this->db->from('wa_regency a');
+        $this->db->where('province_id', '13');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	public function get_SuplaiVaksinKabKota($id)
 	{
         $date  = gmdate('Y-m-d');
 		$this->db->select('a.id_suplai_vaksin,
@@ -56,12 +68,13 @@ class Model_vaksin extends CI_Model
                             ');
 		$this->db->from('ta_suplai_vaksin a');
 		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
+		$this->db->where('a.regency_id', $id);
         $this->db->group_by('a.regency_id');
 		$query = $this->db->get();
-		return $query->result_array();
+		return $query->row_array();
 	}
 
-	public function get_CapaianVaksinKabKota()
+	public function get_CapaianVaksinKabKota($id)
 	{
         $date  = gmdate('Y-m-d');
 		$this->db->select('a.id_capaian_vaksin,
@@ -74,14 +87,47 @@ class Model_vaksin extends CI_Model
                             b.total_suplai,
                             b.tanggal_suplai,
 							SUM(a.total_vaksinasi) AS total_capaian_vaksin,
-							SUM(b.total_suplai) AS total_suplai_vaksin,
-							SUM(b.total_suplai - a.total_vaksinasi) AS total_stok,
+							(SELECT SUM(total_suplai) FROM ta_suplai_vaksin WHERE regency_id = '.$id.') - (SELECT SUM(total_vaksinasi) FROM ta_capaian_vaksin, ta_suplai_vaksin WHERE ta_capaian_vaksin.id_suplai_vaksin = ta_suplai_vaksin.id_suplai_vaksin AND ta_suplai_vaksin.regency_id = '.$id.') AS total_stok,
 							c.name
                             ');
 		$this->db->from('ta_capaian_vaksin a');
 		$this->db->join('ta_suplai_vaksin b', 'a.id_suplai_vaksin = b.id_suplai_vaksin', 'inner');
 		$this->db->join('wa_regency c', 'b.regency_id = c.id', 'inner');
+		$this->db->where('b.regency_id', $id);
         $this->db->group_by('b.regency_id');
+		$query = $this->db->get();
+		return $query->row_array();
+	}
+
+	public function get_StokJenisVaksin($id)
+	{
+		$this->db->select('DISTINCT(a.id_jenis_vaksin), a.regency_id,
+                      ((SELECT SUM(b.total_suplai) FROM ta_suplai_vaksin b WHERE b.regency_id = a.regency_id AND b.id_jenis_vaksin = a.id_jenis_vaksin) -
+                      IFNULL ((SELECT SUM(c.total_vaksinasi) FROM ta_capaian_vaksin c, ta_suplai_vaksin d WHERE c.id_suplai_vaksin = d.id_suplai_vaksin AND d.regency_id = a.regency_id AND d.id_jenis_vaksin = a.id_jenis_vaksin),0)) AS total_suplai,
+                      a.id_suplai_vaksin,
+                      a.id_jenis_vaksin,
+                      a.id_penyalur,
+                      a.tanggal_suplai,
+                      a.regency_id,
+                      e.nm_vaksin,
+                      f.nm_penyalur
+								');
+		$this->db->from('ta_suplai_vaksin a');
+		$this->db->join('ref_jenis_vaksin e', 'e.id_jenis_vaksin = a.id_jenis_vaksin', 'inner');
+		$this->db->join('ref_penyalur f', 'f.id_penyalur = a.id_penyalur', 'inner');
+		$this->db->where('a.regency_id', $id);
+		$this->db->group_by('a.regency_id');
+		$this->db->group_by('a.id_jenis_vaksin');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	public function get_JenisVaksin()
+	{
+		$this->db->select('a.id_jenis_vaksin,
+                            a.nm_vaksin
+                            ');
+		$this->db->from('ref_jenis_vaksin a');
 		$query = $this->db->get();
 		return $query->result_array();
 	}

@@ -42,7 +42,19 @@ class Model_kasus extends CI_Model
 		return $query->result_array();
 	}
 
-    public function get_KasusKabKota()
+	public function get_KabKota()
+	{
+		$this->db->select('a.id,
+                            a.province_id,
+                            a.name
+                            ');
+		$this->db->from('wa_regency a');
+        $this->db->where('province_id', '13');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+    public function get_KasusKabKota($id)
 	{
 		$this->db->select('a.id_kasus,
                             a.regency_id,
@@ -52,21 +64,20 @@ class Model_kasus extends CI_Model
                             a.tanggal_kasus,
 							SUM(a.total_positif) AS total_p,
 							SUM(a.total_sembuh) AS total_s,
-							SUM(a.total_meninggal) AS total_m,
-                            b.name
+							SUM(a.total_meninggal) AS total_m
                             ');
 		$this->db->from('ta_kasus a');
-        $this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
-        $this->db->group_by('a.regency_id');
+        $this->db->where('a.regency_id', $id);
 		$query = $this->db->get();
-		return $query->result_array();
+		return $query->row_array();
 	}
 
-	public function get_KasusKabKotaHarian()
+	public function get_KasusKabKotaHarian($id)
 	{
         $date  = gmdate('Y-m-d');
 		$this->db->select('a.id_kasus,
-                            a.tanggal_kasus,
+							a.tanggal_kasus,
+							a.regency_id,
 							SUM(a.total_positif) AS total_p_now,
 							SUM(a.total_sembuh) AS total_s_now,
 							SUM(a.total_meninggal) AS total_m_now,
@@ -75,9 +86,31 @@ class Model_kasus extends CI_Model
 		$this->db->from('ta_kasus a');
 		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
         $this->db->where('a.tanggal_kasus', $date);
+        $this->db->where('a.regency_id', $id);
         $this->db->group_by('a.regency_id');
 		$query = $this->db->get();
-		return $query->result_array();
+		return $query->row_array();
+	}
+
+	public function get_KasusKabKotaMingguan($id)
+	{
+        $date  = gmdate('Y-m-d');
+		$this->db->select('a.id_kasus,
+							a.tanggal_kasus,
+							a.regency_id,
+							SUM(a.total_positif) AS total_p_week,
+							SUM(a.total_sembuh) AS total_s_week,
+							SUM(a.total_meninggal) AS total_m_week,
+							b.name
+                            ');
+		$this->db->from('ta_kasus a');
+		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
+        $this->db->where("WEEK(a.tanggal_kasus) = WEEK('".$date."')");
+        $this->db->where('a.regency_id', $id);
+		$this->db->group_by('a.regency_id');
+		$query = $this->db->get();
+		// echo $this->db->last_query();die;
+		return $query->row_array();
 	}
 
 }

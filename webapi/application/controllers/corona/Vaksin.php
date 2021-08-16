@@ -62,45 +62,92 @@ class Vaksin extends REST_Controller {
         }
     }
 
+    // public function totsuplaivaksinkabkota_get()
+	// { 
+    //     //get data kabupaten/kota
+	// 	$dataVaksinPerKabKota = array();
+    //     $dataShow = $this->mVaksin->get_SuplaiVaksinKabKota();
+    //     foreach ($dataShow as $key => $r) {
+    //         $row['kabkota']                 = $r['name'];
+    //         $row['total_suplai_vaksin']     = format_ribuan($r['total_suplai_vaksin']);
+    //         $dataVaksinPerKabKota[]         = $row;
+    //     }
+    //     if(count($dataShow) > 0) {
+    //         $this->response([
+    //         'response' => 'RC200',
+    //         'result' => $dataVaksinPerKabKota
+    //         ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
+    //     } else {
+    //         $this->response([
+    //         'response' => 'RC404',
+    //         'result' => 'No data were found'
+    //         ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
+    //     }
+	// }
+
+    // public function totcapaianvaksinkabkota_get()
+	// { 
+    //     //get data kabupaten/kota
+	// 	$dataCapaianVaksinPerKabKota = array();
+    //     $dataShow = $this->mVaksin->get_CapaianVaksinKabKota();
+    //     foreach ($dataShow as $key => $r) {
+    //         $row['kabkota']                  = $r['name'];
+    //         $row['total_capaian_vaksin']     = format_ribuan($r['total_capaian_vaksin']);
+    //         $row['total_suplai_vaksin']      = format_ribuan($r['total_suplai_vaksin']);
+    //         $row['total_stok']               = format_ribuan($r['total_stok']);
+    //         $dataCapaianVaksinPerKabKota[]   = $row;
+    //     }
+    //     if(count($dataShow) > 0) {
+    //         $this->response([
+    //         'response' => 'RC200',
+    //         'result' => $dataCapaianVaksinPerKabKota
+    //         ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
+    //     } else {
+    //         $this->response([
+    //         'response' => 'RC404',
+    //         'result' => 'No data were found'
+    //         ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
+    //     }
+    // }
+    
     public function totsuplaivaksinkabkota_get()
 	{ 
         //get data kabupaten/kota
-		$dataVaksinPerKabKota = array();
-        $dataShow = $this->mVaksin->get_SuplaiVaksinKabKota();
+        $dataKabKota    = array();
+        $stokKabKota    = array();
+        $totVaksin      = array();
+        $dataShow = $this->mVaksin->get_KabKota();
         foreach ($dataShow as $key => $r) {
+            $totVaksin      = array();
+            $row['id_regency']              = $r['id'];
             $row['kabkota']                 = $r['name'];
-            $row['total_suplai_vaksin']     = format_ribuan($r['total_suplai_vaksin']);
-            $dataVaksinPerKabKota[]         = $row;
-        }
-        if(count($dataShow) > 0) {
-            $this->response([
-            'response' => 'RC200',
-            'result' => $dataVaksinPerKabKota
-            ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
-        } else {
-            $this->response([
-            'response' => 'RC404',
-            'result' => 'No data were found'
-            ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
-        }
-	}
 
-    public function totcapaianvaksinkabkota_get()
-	{ 
-        //get data kabupaten/kota
-		$dataCapaianVaksinPerKabKota = array();
-        $dataShow = $this->mVaksin->get_CapaianVaksinKabKota();
-        foreach ($dataShow as $key => $r) {
-            $row['kabkota']                  = $r['name'];
-            $row['total_capaian_vaksin']     = format_ribuan($r['total_capaian_vaksin']);
-            $row['total_suplai_vaksin']      = format_ribuan($r['total_suplai_vaksin']);
-            $row['total_stok']               = format_ribuan($r['total_stok']);
-            $dataCapaianVaksinPerKabKota[]   = $row;
+            $dataAll = $this->mVaksin->get_SuplaiVaksinKabKota($r['id']);
+            $stokKabKota['total_suplai_vaksin']         = !empty($dataAll) ? format_ribuan($dataAll['total_suplai_vaksin']) : '0';
+            
+            $dataCapaian = $this->mVaksin->get_CapaianVaksinKabKota($r['id']);
+            $totCapaian['total_capaian_vaksin']         = !empty($dataCapaian) ? format_ribuan($dataCapaian['total_capaian_vaksin']) : '0';
+            $totCapaian['total_stok']                   = !empty($dataCapaian) ? format_ribuan($dataCapaian['total_stok']) : '0';
+
+
+            $dataVaksin = $this->mVaksin->get_StokJenisVaksin($r['id']);
+            foreach($dataVaksin as $show => $key ) {
+                $totVaksin[$show]['nm_vaksin']          = !empty($key) ? format_ribuan($key['nm_vaksin']) : '0';
+                $totVaksin[$show]['total_suplai']       = !empty($key) ? format_ribuan($key['total_suplai']) : '0';
+                
+            }
+
+            $row['data_vaksin_kabkota']         = $stokKabKota;
+            $row['data_capaian_kabkota']        = $totCapaian;
+            $row['data_capaian_vaksin']        = $totVaksin;
+            unset($totVaksin);
+            $dataKabKota[]                      = $row;
         }
+
         if(count($dataShow) > 0) {
             $this->response([
             'response' => 'RC200',
-            'result' => $dataCapaianVaksinPerKabKota
+            'result' => $dataKabKota
             ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
         } else {
             $this->response([
