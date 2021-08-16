@@ -16,7 +16,8 @@ class Vaksin extends REST_Controller {
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
 		// $this->methods['list_get']['limit']     = 1000;
     	$this->methods['totvaksin_get']['limit'] = 1000;
-    	$this->methods['pelatihanDetail_get']['limit']   = 500;
+    	$this->methods['totjenisvaksin_get']['limit']   = 1000;
+    	$this->methods['totsuplaivaksinkabkota_get']['limit']   = 1000;
 	}
 
     public function totvaksin_get() {
@@ -61,54 +62,6 @@ class Vaksin extends REST_Controller {
             ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
         }
     }
-
-    // public function totsuplaivaksinkabkota_get()
-	// { 
-    //     //get data kabupaten/kota
-	// 	$dataVaksinPerKabKota = array();
-    //     $dataShow = $this->mVaksin->get_SuplaiVaksinKabKota();
-    //     foreach ($dataShow as $key => $r) {
-    //         $row['kabkota']                 = $r['name'];
-    //         $row['total_suplai_vaksin']     = format_ribuan($r['total_suplai_vaksin']);
-    //         $dataVaksinPerKabKota[]         = $row;
-    //     }
-    //     if(count($dataShow) > 0) {
-    //         $this->response([
-    //         'response' => 'RC200',
-    //         'result' => $dataVaksinPerKabKota
-    //         ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
-    //     } else {
-    //         $this->response([
-    //         'response' => 'RC404',
-    //         'result' => 'No data were found'
-    //         ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
-    //     }
-	// }
-
-    // public function totcapaianvaksinkabkota_get()
-	// { 
-    //     //get data kabupaten/kota
-	// 	$dataCapaianVaksinPerKabKota = array();
-    //     $dataShow = $this->mVaksin->get_CapaianVaksinKabKota();
-    //     foreach ($dataShow as $key => $r) {
-    //         $row['kabkota']                  = $r['name'];
-    //         $row['total_capaian_vaksin']     = format_ribuan($r['total_capaian_vaksin']);
-    //         $row['total_suplai_vaksin']      = format_ribuan($r['total_suplai_vaksin']);
-    //         $row['total_stok']               = format_ribuan($r['total_stok']);
-    //         $dataCapaianVaksinPerKabKota[]   = $row;
-    //     }
-    //     if(count($dataShow) > 0) {
-    //         $this->response([
-    //         'response' => 'RC200',
-    //         'result' => $dataCapaianVaksinPerKabKota
-    //         ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
-    //     } else {
-    //         $this->response([
-    //         'response' => 'RC404',
-    //         'result' => 'No data were found'
-    //         ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
-    //     }
-    // }
     
     public function totsuplaivaksinkabkota_get()
 	{ 

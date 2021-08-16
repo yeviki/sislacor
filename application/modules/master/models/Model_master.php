@@ -291,6 +291,7 @@ class Model_master extends CI_Model
                       a.id_kat_kamar,
                       a.tanggal,
                       c.fullname,
+                      c.shortname,
                       d.nm_kamar
 								');
 		$this->db->join('ms_rs_rujukan c', 'a.id_rs = c.id_rs', 'inner');
@@ -302,7 +303,7 @@ class Model_master extends CI_Model
     $dd_kamar[''] = 'Pilih RS Kamar';
     if ($query->num_rows() > 0) {
       foreach ($query->result_array() as $row) {
-        $dd_kamar[$row['id_rs_kamar']] = $row['fullname'] .' - '. $row['nm_kamar'] .' - '. format_ribuan($row['total_kamar']);
+        $dd_kamar[$row['id_rs_kamar']] = $row['shortname'] .' - '. $row['nm_kamar'] .' - '. format_ribuan($row['total_kamar']);
       }
     }
     return $dd_kamar;

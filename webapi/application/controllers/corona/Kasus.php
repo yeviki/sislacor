@@ -17,8 +17,6 @@ class Kasus extends REST_Controller {
 		// $this->methods['list_get']['limit']     = 1000;
     	$this->methods['totkasus_get']['limit'] = 1000;
     	$this->methods['totkasuskabkota_get']['limit'] = 1000;
-    	$this->methods['totkasusharian_get']['limit']   = 500;
-    	$this->methods['totkasuskabkotanow_get']['limit']   = 500;
 	}
 
     public function totkasus_get() {

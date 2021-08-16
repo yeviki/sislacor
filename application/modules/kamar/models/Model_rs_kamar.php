@@ -14,10 +14,17 @@ class Model_rs_kamar extends CI_Model
 		parent::__construct();
 	}
 
+	public function getDataKategoriKamar()
+	{
+		$this->db->order_by('id_kat_kamar', 'ASC');
+		$query = $this->db->get('ref_kat_kamar');
+		return $query->result_array();
+	}
+
 	public function validasiDataValue()
 	{
-		$this->form_validation->set_rules('total_kamar', 'Total Stok', 'required|trim');
-		$this->form_validation->set_rules('id_kat_kamar', 'Kategori Kamar', 'required|trim');
+		// $this->form_validation->set_rules('total_kamar', 'Total Stok', 'required|trim');
+		// $this->form_validation->set_rules('id_kat_kamar', 'Kategori Kamar', 'required|trim');
 		$this->form_validation->set_rules('id_rs', 'Rumah Sakit', 'required|trim');
 		$this->form_validation->set_rules('tanggal', 'Tanggal', 'required|trim');
   		validation_message_setting();
@@ -46,16 +53,7 @@ class Model_rs_kamar extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select('a.id_rs_kamar,
-								a.total_kamar,
-								a.id_rs,
-								a.id_kat_kamar,
-								a.tanggal,
-								b.fullname,
-								c.nm_kamar
-								');
-		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
-		$this->db->join('ref_kat_kamar c', 'c.id_kat_kamar = a.id_kat_kamar', 'inner');
+		$this->db->group_by(array('a.id_rs', 'a.tanggal'));
 		return $this->db->count_all_results('ta_rs_kamar a');
 	}
 
@@ -67,12 +65,14 @@ class Model_rs_kamar extends CI_Model
 				$post[$v['name']] = $v['value'];
 			}
 		}
-		$this->db->select('a.id_rs_kamar,
+		$this->db->select('GROUP_CONCAT(CONCAT(c.nm_kamar,": ",a.total_kamar) ORDER BY a.id_kat_kamar ASC SEPARATOR ", ") AS rekap,
+								a.id_rs_kamar,
 								a.total_kamar,
 								a.id_rs,
 								a.id_kat_kamar,
 								a.tanggal,
-								b.fullname,
+								CONCAT("RS ", b.shortname), b.shortname AS name,
+								b.shortname,
 								c.nm_kamar
 								');
 		$this->db->from('ta_rs_kamar a');
@@ -82,9 +82,9 @@ class Model_rs_kamar extends CI_Model
 		// id_rs Vaksin
 		if(isset($post['id_rs']) AND $post['id_rs'] != '')
 			$this->db->where('a.id_rs', $post['id_rs']);
-		// Jenis Vaksin
-		if(isset($post['id_kamar']) AND $post['id_kamar'] != '')
-			$this->db->where('a.id_kat_kamar', $post['id_kamar']);
+		// // Jenis Vaksin
+		// if(isset($post['id_kamar']) AND $post['id_kamar'] != '')
+		// 	$this->db->where('a.id_kat_kamar', $post['id_kamar']);
 		// tanggal Masuk
         if(isset($post['tanggal_kamar']) AND $post['tanggal_kamar'] != ''){
 			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y")', $post['tanggal_kamar']);
@@ -105,15 +105,29 @@ class Model_rs_kamar extends CI_Model
 			}
 		$i++;
 		}
+		$this->db->group_by(array('a.id_rs', 'a.tanggal'));
 		$this->db->order_by('a.tanggal DESC');
 		$this->db->order_by('a.id_rs_kamar DESC');
   	}
 
-	public function getDataDetail($id_rs_kamar)
+	public function getDataDetail($id_rs, $tanggal)
 	{
-		$this->db->where('id_rs_kamar', $id_rs_kamar);
-		$query = $this->db->get('ta_rs_kamar');
-		return $query->row_array();
+		$this->db->select('a.id_rs_kamar,
+							a.total_kamar,
+							a.id_rs,
+							a.id_kat_kamar,
+							a.tanggal,
+							b.shortname,
+							c.nm_kamar
+								');
+		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
+		$this->db->join('ref_kat_kamar c', 'a.id_kat_kamar = c.id_kat_kamar', 'inner');
+		$this->db->where('a.id_rs', $id_rs);
+		$this->db->where('a.tanggal', $tanggal);
+
+		$query = $this->db->get('ta_rs_kamar a');
+		// echo $this->db->last_query(); die;
+		return $query->result_array();
 	}
 
 	public function insertData()
@@ -122,16 +136,31 @@ class Model_rs_kamar extends CI_Model
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
+		$params      	 	= escape($this->input->post('param', TRUE));
+		$id_rs       		= escape($this->input->post('id_rs', TRUE));
+		$tanggal       		= date_convert(escape($this->input->post('tanggal', TRUE)));
 
-		$tanggal	= date_convert(escape($this->input->post('tanggal', TRUE)));
+		// $tanggal	= date_convert(escape($this->input->post('tanggal', TRUE)));
 
-			$data = array(
-				'tanggal'			=> $tanggal,
-				'total_kamar'		=> escape($this->input->post('total_kamar', TRUE)),
-				'id_rs'				=> escape($this->input->post('id_rs', TRUE)),
-				'id_kat_kamar'		=> escape($this->input->post('id_kat_kamar', TRUE))
-			);
-			$this->db->insert('ta_rs_kamar', $data);
+		// 	$data = array(
+		// 		'tanggal'			=> $tanggal,
+		// 		'total_kamar'		=> escape($this->input->post('total_kamar', TRUE)),
+		// 		'id_rs'				=> escape($this->input->post('id_rs', TRUE)),
+		// 		'id_kat_kamar'		=> escape($this->input->post('id_kat_kamar', TRUE))
+		// 	);
+		// 	$this->db->insert('ta_rs_kamar', $data);
+
+			$arrKamar = array();
+			foreach ($params as $key => $v) {
+				$arrKamar[] = array(
+					'id_rs' 			=> $id_rs,
+					'tanggal' 			=> $tanggal,
+					'id_kat_kamar'	 	=> $key,
+					'total_kamar'		=> $v,
+				);
+			}
+			$this->db->insert_batch('ta_rs_kamar', $arrKamar);
+
 			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
 	}
 

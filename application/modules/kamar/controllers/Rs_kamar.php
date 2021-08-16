@@ -21,11 +21,12 @@ class Rs_kamar extends SLP_Controller {
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Kamar', '#');
 		$this->breadcrumb->add('Ketersedaan Kamar', '#');
-		$this->session_info['list_id_kat_kamar']   	= $this->mmas->getDataKamar();
-		$this->session_info['list_id_rs']   			= $this->mmas->getDataMasterHospital();
+		// $this->session_info['list_id_kat_kamar']   	= $this->mmas->getDataKamar();
+		$this->session_info['list_kamar']   	= $this->mRsKamar->getDataKategoriKamar();
+		$this->session_info['list_id_rs']   		= $this->mmas->getDataMasterHospital();
 		$this->session_info['page_name'] = "Ketersedaan Kamar";
 
-    	$this->template->build('rs_kamar/vlist', $this->session_info);
+    	$this->template->build('rs_kamar/vlist_new', $this->session_info);
 	}
 
 	public function listview()
@@ -44,11 +45,10 @@ class Rs_kamar extends SLP_Controller {
 					$row = array();
 					$row[] = $no;
 							$row[] = $dl['tanggal'];
-							$row[] = rujukan($dl['id_rs']);
-							$row[] = kamar($dl['id_kat_kamar']);
-							$row[] = format_ribuan($dl['total_kamar']);
-					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_rs_kamar']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_rs_kamar']).'" title="Delete"><i class="fa fa-times"></i> </button>';
+							$row[] = $dl['shortname'];
+							$row[] = $dl['rekap'];
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_rs']).'" data-date="'.$dl['tanggal'].'" title="Edit"><i class="fa fa-pencil"></i> </button>
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_rs']).'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
@@ -89,25 +89,38 @@ class Rs_kamar extends SLP_Controller {
 
 	public function details()
 	{
+
+		// print_r($_POST);
+		// exit; 	
+
 		if (!$this->input->is_ajax_request()) {
    		exit('No direct script access allowed');
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_rs_kamar  = $this->input->post('vaksinId', TRUE);
-			if(!empty($id_rs_kamar) AND !empty($session)) {
-				$data = $this->mRsKamar->getDataDetail($this->encryption->decrypt($id_rs_kamar));
-				$row = array();
-				$row['id_rs_kamar']			=	!empty($data) ? $data['id_rs_kamar'] : '';
-				$row['total_kamar']			=	!empty($data) ? $data['total_kamar'] : '';
-				$row['id_rs']				=	!empty($data) ? $data['id_rs'] : '';
-				$row['id_kat_kamar']		=	!empty($data) ? $data['id_kat_kamar'] : '';
-				$row['tanggal']				= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal'])) : '';
+			$id_rs  		= $this->input->post('regencyId', TRUE);
+			$tanggal 		= $this->input->post('publishDate', TRUE);
+			if(!empty($id_rs) AND !empty($session)) {
+				$data = $this->mRsKamar->getDataDetail($this->encryption->decrypt($id_rs), $tanggal);
+				// print_r($data);
+				// die; 	
+				$test = array('id_rs' => $this->encryption->decrypt($id_rs), 'tanggal' => $tanggal);
+				$row = array(); $no=1;
+				foreach ($data as $key => $val) {
+					$row['no'] 				= $no;
+					$row['nm_kamar']		= $val['nm_kamar'];
+					$row['total_kamar']		= $val['total_kamar'];
+					$hasil[] = $row;
+					$no++;
+				}
 
-				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);
+				// print_r($hasil); die;
+				$result = array('status' => 1, 'message' => $hasil, 'detail' => $test, 'csrfHash' => $csrfHash);
 			} else {
 				$result = array('status' => 0, 'message' => array(), 'csrfHash' => $csrfHash);
 			}
+				
+
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
 	}
