@@ -1,7 +1,7 @@
 <IfModule mod_rewrite.c>
 
 RewriteEngine On
-RewriteBase /sipelacor/webapi
+RewriteBase /sislacor/webapi
 
 #RewriteCond %{HTTPS} off
 #RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
