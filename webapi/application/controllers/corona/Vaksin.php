@@ -43,10 +43,21 @@ class Vaksin extends REST_Controller {
 
     public function totjenisvaksin_get() {
         $dataTotalJenisVaksin = array();
+        $totVaksin = array();
         $dataAll = $this->mVaksin->get_TotalJenisVaksin();
 		foreach ($dataAll as $key => $r) {
+            $totVaksin      = array();
             $row['jenis_vaksin']         = $r['id_jenis_vaksin'];
-            $row['total_jenis_vaksin']   = format_ribuan($r['total_vaksin_per_jenis']);
+            $row['nm_vaksin']            = $r['nm_vaksin'];
+            $row['total_jenis_vaksin']   = $r['total_vaksin_per_jenis'];
+
+            $dataVaksin = $this->mVaksin->get_TotalSuplaiVaksin($r['id_jenis_vaksin']);
+            foreach($dataVaksin as $show => $key ) {
+                $totVaksin     = !empty($key) ? $key['total_distribusi'] : '0';
+                
+            }
+            $row['data_distribusi_vaksin']   = $totVaksin;
+            unset($totVaksin);
             $dataTotalJenisVaksin[]      = $row;
         }
 
@@ -76,17 +87,17 @@ class Vaksin extends REST_Controller {
             $row['kabkota']                 = $r['name'];
 
             $dataAll = $this->mVaksin->get_SuplaiVaksinKabKota($r['id']);
-            $stokKabKota['total_suplai_vaksin']         = !empty($dataAll) ? format_ribuan($dataAll['total_suplai_vaksin']) : '0';
+            $stokKabKota['total_suplai_vaksin']         = !empty($dataAll) ? $dataAll['total_suplai_vaksin'] : '0';
             
             $dataCapaian = $this->mVaksin->get_CapaianVaksinKabKota($r['id']);
-            $totCapaian['total_capaian_vaksin']         = !empty($dataCapaian) ? format_ribuan($dataCapaian['total_capaian_vaksin']) : '0';
-            $totCapaian['total_stok']                   = !empty($dataCapaian) ? format_ribuan($dataCapaian['total_stok']) : '0';
+            $totCapaian['total_capaian_vaksin']         = !empty($dataCapaian) ? $dataCapaian['total_capaian_vaksin'] : '0';
+            $totCapaian['total_stok']                   = !empty($dataCapaian) ? $dataCapaian['total_stok'] : '0';
 
 
             $dataVaksin = $this->mVaksin->get_StokJenisVaksin($r['id']);
             foreach($dataVaksin as $show => $key ) {
-                $totVaksin[$show]['nm_vaksin']          = !empty($key) ? format_ribuan($key['nm_vaksin']) : '0';
-                $totVaksin[$show]['total_suplai']       = !empty($key) ? format_ribuan($key['total_suplai']) : '0';
+                $totVaksin[$show]['nm_vaksin']          = !empty($key) ? $key['nm_vaksin'] : '0';
+                $totVaksin[$show]['total_suplai']       = !empty($key) ? $key['total_suplai'] : '0';
                 
             }
 

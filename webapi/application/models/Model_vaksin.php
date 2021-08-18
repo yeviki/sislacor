@@ -33,10 +33,28 @@ class Model_vaksin extends CI_Model
                             a.total_stok,
                             a.tanggal_masuk,
                             a.id_jenis_vaksin,
-							SUM(a.total_stok) AS total_vaksin_per_jenis
+							SUM(a.total_stok) AS total_vaksin_per_jenis,
+                            b.nm_vaksin
                             ');
 		$this->db->from('ta_vaksin_masuk a');
 		$this->db->join('ref_jenis_vaksin b', 'a.id_jenis_vaksin = b.id_jenis_vaksin', 'inner');
+        $this->db->group_by('a.id_jenis_vaksin');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	public function get_TotalSuplaiVaksin($id_jenis_vaksin)
+	{
+		$this->db->select('a.id_suplai_vaksin,
+                            a.total_suplai,
+                            a.tanggal_suplai,
+                            a.id_jenis_vaksin,
+							SUM(a.total_suplai) AS total_distribusi,
+                            b.nm_vaksin
+                            ');
+		$this->db->from('ta_suplai_vaksin a');
+		$this->db->join('ref_jenis_vaksin b', 'a.id_jenis_vaksin = b.id_jenis_vaksin', 'inner');
+        $this->db->where('a.id_jenis_vaksin', $id_jenis_vaksin);
         $this->db->group_by('a.id_jenis_vaksin');
 		$query = $this->db->get();
 		return $query->result_array();

@@ -14,11 +14,16 @@ class Model_pemakaian_tabung extends CI_Model
 		parent::__construct();
 	}
 
+	public function getDataKatTabung()
+	{
+		$this->db->order_by('id_kat_tabung', 'ASC');
+		$query = $this->db->get('ref_kat_tabung');
+		return $query->result_array();
+	}
+
 	public function validasiDataValue()
 	{
-		$this->form_validation->set_rules('total_terpakai', 'Total Terpakai', 'required|trim');
-		$this->form_validation->set_rules('id_stok_tabung', 'Kategori Tabung', 'required|trim');
-		$this->form_validation->set_rules('tanggal_pemakaian', 'Tanggal pemakaian', 'required|trim');
+		$this->form_validation->set_rules('tanggal', 'Tanggal pemakaian', 'required|trim');
   		validation_message_setting();
 		if ($this->form_validation->run() == FALSE)
 			return false;
@@ -26,7 +31,7 @@ class Model_pemakaian_tabung extends CI_Model
 			return true;
 	}
 
-	var $search = array('tanggal_pemakaian', 'id_stok_tabung');
+	var $search = array('search_tanggal', 'id_rs');
 	public function get_datatables($param)
 	{
 		$this->_get_datatables_query($param);
@@ -45,19 +50,7 @@ class Model_pemakaian_tabung extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select('a.id_pemakaian_tabung,
-								a.total_terpakai,
-								a.id_stok_tabung,
-								a.tanggal_pemakaian,
-								b.id_rs,
-								b.id_kat_tabung,
-								b.total_stok_tabung,
-								c.fullname,
-								d.nm_tabung
-								');
-		$this->db->join('ta_stok_tabung b', 'a.id_stok_tabung = b.id_stok_tabung', 'inner');
-		$this->db->join('ms_rs_rujukan c', 'b.id_rs = c.id_rs', 'inner');
-		$this->db->join('ref_kat_tabung d', 'b.id_kat_tabung = d.id_kat_tabung', 'inner');
+		$this->db->group_by(array('a.id_rs', 'a.tanggal_pemakaian'));
 		return $this->db->count_all_results('ta_pemakaian_tabung a');
 	}
 
@@ -71,28 +64,20 @@ class Model_pemakaian_tabung extends CI_Model
 		}
 		$this->db->select('a.id_pemakaian_tabung,
 								a.total_terpakai,
-								a.id_stok_tabung,
 								a.tanggal_pemakaian,
-								b.id_rs,
-								b.id_kat_tabung,
-								b.total_stok_tabung,
-								c.fullname,
-								d.nm_tabung
+								a.id_rs,
+								a.id_kat_tabung,
+								b.shortname
 								');
-        $this->db->from('ta_pemakaian_tabung a');
-		$this->db->join('ta_stok_tabung b', 'a.id_stok_tabung = b.id_stok_tabung', 'inner');
-		$this->db->join('ms_rs_rujukan c', 'b.id_rs = c.id_rs', 'inner');
-		$this->db->join('ref_kat_tabung d', 'b.id_kat_tabung = d.id_kat_tabung', 'inner');
+		$this->db->from('ta_pemakaian_tabung a');
+		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
 		
 		// RS
 		if(isset($post['id_rs']) AND $post['id_rs'] != '')
-			$this->db->where('b.id_rs', $post['id_rs']);
-        // Kamar
-		if(isset($post['id_tabung']) AND $post['id_tabung'] != '')
-        $this->db->where('b.id_kat_tabung', $post['id_tabung']);
+			$this->db->where('a.id_rs', $post['id_rs']);
 		// Tanggal Pemakaian
-        if(isset($post['pemakaian']) AND $post['pemakaian'] != ''){
-			$this->db->where('DATE_FORMAT(a.tanggal_pemakaian, "%m/%d/%Y")', $post['pemakaian']);
+        if(isset($post['search_tanggal']) AND $post['search_tanggal'] != ''){
+			$this->db->where('DATE_FORMAT(a.tanggal_pemakaian, "%m/%d/%Y")', $post['search_tanggal']);
 		}
 		
 		$i = 0;
@@ -110,15 +95,63 @@ class Model_pemakaian_tabung extends CI_Model
 			}
 		$i++;
 		}
+		$this->db->group_by(array('a.id_rs', 'a.tanggal_pemakaian'));
 		$this->db->order_by('a.tanggal_pemakaian DESC');
 		$this->db->order_by('a.id_pemakaian_tabung DESC');
-  	}
-
-	public function getDataDetail($id_pemakaian_tabung)
+	}
+	  
+	public function getDataStokTabung($id_rs)
 	{
-		$this->db->where('id_pemakaian_tabung', $id_pemakaian_tabung);
-		$query = $this->db->get('ta_pemakaian_tabung');
+		$this->db->select('DISTINCT(a.id_kat_tabung), a.id_rs, 
+						SUM(a.total_stok_tabung) AS total_stok_tabung,
+						(SELECT sum(x.total_terpakai) FROM  ta_pemakaian_tabung x WHERE x.id_rs=a.id_rs AND x.id_kat_tabung=a.id_kat_tabung) AS jml_digunakan,
+						ifnull(((SUM(a.total_stok_tabung)) - (SELECT sum(x.total_terpakai) FROM  ta_pemakaian_tabung x WHERE x.id_rs=a.id_rs AND x.id_kat_tabung=a.id_kat_tabung)),SUM(a.total_stok_tabung)) AS sisa_tabung,
+						a.id_kat_tabung,
+						a.tanggal,
+						c.shortname, 
+						e.nm_tabung
+					');
+		$this->db->join('ms_rs_rujukan c', 'a.id_rs = c.id_rs', 'inner');
+		$this->db->join('ref_kat_tabung e', 'e.id_kat_tabung = a.id_kat_tabung', 'inner');
+		$this->db->where('a.id_rs', $id_rs);
+		$this->db->group_by('a.id_rs');
+		$this->db->group_by('a.id_kat_tabung');
+		$query = $this->db->get('ta_stok_tabung a');
+		// echo $this->db->last_query(); die;
+		return $query->result_array();
+	}
+
+	public function getTotalTerpakai($date, $rs, $tabung){
+		$this->db->select('a.id_rs,
+						   a.tanggal_pemakaian,
+						   a.id_kat_tabung,
+						   a.total_terpakai');
+		$this->db->from('ta_pemakaian_tabung a');
+		$this->db->where('a.tanggal_pemakaian', $date);
+		$this->db->where('a.id_rs', $rs);
+		$this->db->where('a.id_kat_tabung', $tabung);
+		$query = $this->db->get();
 		return $query->row_array();
+	}
+
+	public function getDataDetail($id_rs, $tanggal)
+	{
+		$this->db->select('a.id_pemakaian_tabung,
+							a.total_terpakai,
+							a.id_rs,
+							a.id_kat_tabung,
+							a.tanggal_pemakaian,
+							b.shortname,
+							c.nm_tabung
+								');
+		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
+		$this->db->join('ref_kat_tabung c', 'a.id_kat_tabung = c.id_kat_tabung', 'inner');
+		$this->db->where('a.id_rs', $id_rs);
+		$this->db->where('a.tanggal_pemakaian', $tanggal);
+
+		$query = $this->db->get('ta_pemakaian_tabung a');
+		// echo $this->db->last_query(); die;
+		return $query->result_array();
 	}
 
 	public function insertData()
@@ -127,16 +160,34 @@ class Model_pemakaian_tabung extends CI_Model
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
+		$params      	 	= escape($this->input->post('param', TRUE));
+		$id_rs       		= escape($this->input->post('id_rs', TRUE));
+		$tanggal       		= date_convert(escape($this->input->post('tanggal', TRUE)));
 
-		$tanggal_pemakaian	= date_convert(escape($this->input->post('tanggal_pemakaian', TRUE)));
-
-			$data = array(
-				'tanggal_pemakaian'			=> $tanggal_pemakaian,
-				'total_terpakai'		    => escape($this->input->post('total_terpakai', TRUE)),
-				'id_stok_tabung'		    => escape($this->input->post('id_stok_tabung', TRUE))
-			);
-			$this->db->insert('ta_pemakaian_tabung', $data);
-			return array('message'=>'SUCCESS', 'tanggal_pemakaian'=>$tanggal_pemakaian);
+		$this->db->where('id_rs', $id_rs);
+		$this->db->where('tanggal_pemakaian', $tanggal);
+		$qTot = $this->db->count_all_results('ta_pemakaian_tabung');
+		if($qTot > 0)
+			return array('message'=>'ERROR');
+		else {
+			$arrKamar = array();
+			foreach ($params as $key => $v) {
+				$arrKamar[] = array(
+					'id_rs' 			=> $id_rs,
+					'tanggal_pemakaian' => $tanggal,
+					'id_kat_tabung'	 	=> $key,
+					'total_terpakai'	=> $v,
+					'create_by'	 		=> $create_by,
+					'create_date' 		=> $create_date,
+					'create_ip'	 		=> $create_ip,
+					'mod_by'	 		=> $create_by,
+					'mod_date' 			=> $create_date,
+					'mod_ip'	 		=> $create_ip
+				);
+			}
+		$this->db->insert_batch('ta_pemakaian_tabung', $arrKamar);
+		return array('message'=>'SUCCESS', 'tanggal_pemakaian'=>$tanggal);
+		}
 	}
 
 	public function updateData()
@@ -144,21 +195,28 @@ class Model_pemakaian_tabung extends CI_Model
 		$create_by    		= $this->app_loader->current_account();
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
-		$id_pemakaian_tabung	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
-		//cek data
-		$dataVaksin 	    = $this->getDataDetail($id_pemakaian_tabung);
-		$tanggal_pemakaian  = !empty($dataVaksin) ? $dataVaksin['tanggal_pemakaian'] : '';
-		if(count($dataVaksin) <= 0)
-			return array('message'=>'ERROR', 'tanggal_pemakaian'=>$tanggal_pemakaian);
+		$params       		= escape($this->input->post('param', TRUE));
+		$id_rs				= $this->encryption->decrypt(escape($this->input->post('rsId', TRUE)));
+		$publishDate  		= escape($this->input->post('publishDate', TRUE));
+		
+		$dataKamar 	= $this->getDataDetail($id_rs, $publishDate);
+		if(count($dataKamar) <= 0)
+			return array('message'=>'ERROR');
 		else {
+			foreach ($params as $key => $v) {
 				$data = array(
-					'tanggal_pemakaian'		=> date_convert(escape($this->input->post('tanggal_pemakaian', TRUE))),
-					'total_terpakai'		=> escape($this->input->post('total_terpakai', TRUE)),
-					'id_stok_tabung'		=> escape($this->input->post('id_stok_tabung', TRUE))
+					'total_terpakai'	 	=> $v,
+					'tanggal_pemakaian'	 	=> date_convert(escape($this->input->post('tanggal', TRUE))),
+					'mod_by'	 			=> $create_by,
+					'mod_date' 	 			=> $create_date,
+					'mod_ip'	 			=> $create_ip
 				);
-			$this->db->where('id_pemakaian_tabung', $id_pemakaian_tabung);
-			$this->db->update('ta_pemakaian_tabung', $data);
-			return array('message'=>'SUCCESS', 'tanggal_pemakaian'=>$tanggal_pemakaian);
+				$this->db->where('id_rs', $id_rs);
+				$this->db->where('id_kat_tabung', $key);
+				$this->db->where('tanggal_pemakaian', $publishDate);
+				$this->db->update('ta_pemakaian_tabung', $data);
+				return array('message'=>'SUCCESS');
+			}
 		}
 	}
 

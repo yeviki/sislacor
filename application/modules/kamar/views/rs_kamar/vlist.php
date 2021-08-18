@@ -44,13 +44,6 @@
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-3">
-                  <div class="form-group required">
-                    <label for="id_kamar" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('id_kamar', $list_id_kat_kamar, $this->input->post('id_kamar'), 'class="select-all" id="id_kamar"');?>
-                    <div class="help-block"></div>
-                  </div>
-                </div>
-                <div class="col-xs-12 col-sm-3">
                     <div class="form-group">
                         <label for="tanggal_kamar" class="control-label"><b>Pilih Tanggal <font color="red" size="1em">(*)</font></b></label>
                         <div class="input-group date datemonth">
@@ -91,10 +84,11 @@
               <thead>
                 <tr>
                   <th width="3%">#</th>
-                  <th width="17%">Tanggal</th>
-                  <th width="17%">Rumah Sakit</th>
-                  <th width="17%">Kategori</th>
-                  <th width="17%">Total Kamar</th>
+                  <th width="10%">Tanggal</th>
+                  <th width="12%">Rumah Sakit</th>
+                  <?php foreach ($list_kamar as $key => $k): ?>
+                    <th width="12%"><?php echo $k['nm_kamar']; ?></th>
+                  <?php endforeach; ?>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -107,7 +101,7 @@
 </div><!-- container -->
 
 <div class="modal fade in" id="modalEntryForm" tabindex="-1" role="dialog" aria-labelledby="modalEntryLabel" aria-hidden="true">
-  <div class="modal-dialog modal-md" id="frmEntry">
+  <div class="modal-dialog modal-lg" id="frmEntry">
     <div class="modal-content">
       <div class="modal-header" style="padding:10px 15px 10px 15px;">
         <button type="button" class="close btnClose" aria-hidden="true">&times;</button>
@@ -117,27 +111,14 @@
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
-            <div class="col-xs-12 col-sm-12">
+          <?php
+              echo form_input(array('type'=>'hidden', 'name'=>'rsId', 'id'=>'idRs'));
+              echo form_input(array('type'=>'hidden', 'name'=>'publishDate', 'id'=>'datetanggal'));
+            ?>
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
                 <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
                 <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all" id="id_rs"');?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-12">
-              <div class="form-group required">
-                <label for="id_kat_kamar" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('id_kat_kamar', $list_id_kat_kamar, $this->input->post('id_kat_kamar'), 'class="select-all" id="id_kat_kamar"');?>
-                <div class="help-block"></div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <?php echo form_hidden('vaksinId', ''); ?>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="total_kamar" class="control-label" style="font-size:15px;"><b>Total Kamar <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_kamar" id="total_kamar" placeholder="Total" value="<?php echo $this->input->post('total_kamar', TRUE); ?>">
                 <div class="help-block"></div>
               </div>
             </div>
@@ -152,6 +133,28 @@
                 <div class="help-block"></div>
               </div>
             </div>
+          </div>
+          <div class="table-responsive">
+            <table cellspacing="0" cellpadding="0" class="table table-striped table-bordered" width="100%" id="tblOtgInput">
+              <thead>
+                <tr>
+                  <th width="3%">No.</th>
+                  <th width="77%">Jenis Kamar</th>
+                  <th width="20%">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody>
+              <?php $i=1; foreach ($list_kamar as $key => $k): ?>
+                <tr>
+                  <td><?php echo $i; ?>.</td>
+                  <td id="<?php echo 'nama_kamar_'.$i; ?>"><?php echo $k['nm_kamar']; ?></td>
+                  <td>
+                    <input type="text" class="form-control nominal" name="param[<?php echo $k['id_kat_kamar']; ?>]" id="<?php echo 'total_jum_'.$i; ?>" placeholder="Jumlah Kamar" value="<?php echo set_value('param['.$k['id_kat_kamar'].']', ''); ?>" required="" oninvalid="this.setCustomValidity('Inputan wajib diisi')" oninput="setCustomValidity('')">
+                  </td>
+                </tr>
+              <?php $i++; endforeach; ?>
+              </tbody>
+            </table>
           </div>
       </div>
       <div class="modal-footer" style="margin-top:0px;padding:10px 15px 15px 0px;">
@@ -261,6 +264,7 @@
     $('#formEntry').attr('action', site + 'kamar/rs-kamar/create');
     $('#errEntry').html('');
     $('.select-all').select2('val', '');
+    $('#id_rs').attr('disabled', false);
     $('#status').select2('val', 1);
     $('.help-block').text('');
     $('.required').removeClass('has-error');
@@ -341,41 +345,52 @@
     });
   });
 
+  //set button edit
   $(document).on('click', '.btnEdit', function(e){
     formReset();
     $('#formEntry').attr('action', site + 'kamar/rs-kamar/update');
-    var id_rs_kamar = $(this).data('id');
+    var rsId   = $(this).data('id');
+    var tanggal = $(this).data('date');
     $('#modalEntryForm').modal({
       backdrop: 'static'
     });
-    getDataVaksinMasuk(id_rs_kamar);
-  });
-
-  function getDataVaksinMasuk(id_rs_kamar) {
+    $('#id_rs').attr('disabled', true);
+    $('#idRs').val(rsId);
+    $('#datetanggal').val(tanggal);
+    var postData = {
+      'rsId'   : rsId,
+      'publishDate' : tanggal,
+      '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()
+    };
     run_waitMe($('#frmEntry'));
     $.ajax({
       type: 'POST',
       url: site + 'kamar/rs-kamar/details',
-      data: {'vaksinId' : id_rs_kamar, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
+      data: postData,
       dataType: 'json',
       success: function(data) {
+        // console.log(data);
         $('input[name="'+csrfName+'"]').val(data.csrfHash);
-        if(data.status == 1) {
-          $('input[name="vaksinId"]').val(id_rs_kamar);
-          $('#total_kamar').val(data.message.total_kamar);
-          $('#tanggal').val(data.message.tanggal);
-          $('#id_rs').select2('val', data.message.id_rs).trigger('change');
-          $('#id_kat_kamar').select2('val', data.message.id_kat_kamar).trigger('change');
+        if(data.status != 0) {
+          $('#id_rs').select2('val', data.detail.id_rs).trigger('change');
+          $('#tanggal').val(data.detail.tanggal);
+          let no = 1;
+          $.each(data.message, function(key,value){
+            $('#tblOtgInput > tbody > tr').find('td#nama_kamar_'+no).text(value['nm_kamar']);
+            $('#tblOtgInput > tbody > tr').find('td > #total_jum_'+no).val(value['total_kamar']);
+            no++;
+          });
         }
         $('#frmEntry').waitMe('hide');
       }
     });
-  }
+  });
 
   $(document).on('click', '.btnDelete', function(e){
     e.preventDefault();
     var postData = {
-      'vaksinId': $(this).data('id'),
+      'rsId': $(this).data('id'),
+      'publishDate': $(this).data('date'),
       '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()
     };
     $(this).html('<i class="fa fa-hourglass-half"></i>');

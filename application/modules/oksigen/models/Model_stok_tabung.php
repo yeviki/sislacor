@@ -14,11 +14,15 @@ class Model_stok_tabung extends CI_Model
 		parent::__construct();
 	}
 
+	public function getDataKatTabung()
+	{
+		$this->db->order_by('id_kat_tabung', 'ASC');
+		$query = $this->db->get('ref_kat_tabung');
+		return $query->result_array();
+	}
+	
 	public function validasiDataValue()
 	{
-		$this->form_validation->set_rules('total_stok_tabung', 'Total Stok', 'required|trim');
-		$this->form_validation->set_rules('id_kat_tabung', 'Kategori Kamar', 'required|trim');
-		$this->form_validation->set_rules('id_rs', 'Rumah Sakit', 'required|trim');
 		$this->form_validation->set_rules('tanggal', 'Tanggal', 'required|trim');
   		validation_message_setting();
 		if ($this->form_validation->run() == FALSE)
@@ -46,16 +50,7 @@ class Model_stok_tabung extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select('a.id_stok_tabung,
-								a.total_stok_tabung,
-								a.id_rs,
-								a.id_kat_tabung,
-								a.tanggal,
-								b.fullname,
-								c.nm_tabung
-								');
-		$this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
-		$this->db->join('ref_kat_tabung c', 'c.id_kat_tabung = a.id_kat_tabung', 'inner');
+		$this->db->group_by(array('a.id_rs', 'a.tanggal'));
 		return $this->db->count_all_results('ta_stok_tabung a');
 	}
 
@@ -72,7 +67,7 @@ class Model_stok_tabung extends CI_Model
 								a.id_rs,
 								a.id_kat_tabung,
 								a.tanggal,
-								b.fullname,
+								b.shortname,
 								c.nm_tabung
 								');
 		$this->db->from('ta_stok_tabung a');
@@ -82,12 +77,9 @@ class Model_stok_tabung extends CI_Model
 		// id_rs Vaksin
 		if(isset($post['id_rs']) AND $post['id_rs'] != '')
 			$this->db->where('a.id_rs', $post['id_rs']);
-		// Jenis Vaksin
-		if(isset($post['id_tabung']) AND $post['id_tabung'] != '')
-			$this->db->where('a.id_kat_tabung', $post['id_tabung']);
 		// tanggal Masuk
-        if(isset($post['tanggal_tabung']) AND $post['tanggal_tabung'] != ''){
-			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y")', $post['tanggal_tabung']);
+        if(isset($post['search_tanggal']) AND $post['search_tanggal'] != ''){
+			$this->db->where('DATE_FORMAT(a.tanggal, "%m/%d/%Y")', $post['search_tanggal']);
 		}
 		
 		$i = 0;
@@ -105,14 +97,41 @@ class Model_stok_tabung extends CI_Model
 			}
 		$i++;
 		}
+		$this->db->group_by(array('a.id_rs', 'a.tanggal'));
 		$this->db->order_by('a.tanggal DESC');
 		$this->db->order_by('a.id_stok_tabung DESC');
   	}
 
-	public function getDataDetail($id_stok_tabung)
-	{
-		$this->db->where('id_stok_tabung', $id_stok_tabung);
-		$query = $this->db->get('ta_stok_tabung');
+	  public function getDataDetail($id_rs, $tanggal)
+	  {
+		  $this->db->select('a.id_stok_tabung,
+							  a.total_stok_tabung,
+							  a.id_rs,
+							  a.id_kat_tabung,
+							  a.tanggal,
+							  b.shortname,
+							  c.nm_tabung
+								  ');
+		  $this->db->join('ms_rs_rujukan b', 'a.id_rs = b.id_rs', 'inner');
+		  $this->db->join('ref_kat_tabung c', 'a.id_kat_tabung = c.id_kat_tabung', 'inner');
+		  $this->db->where('a.id_rs', $id_rs);
+		  $this->db->where('a.tanggal', $tanggal);
+  
+		  $query = $this->db->get('ta_stok_tabung a');
+		  // echo $this->db->last_query(); die;
+		  return $query->result_array();
+	  }
+
+	public function getTotalTabung($date, $rs, $tabung){
+		$this->db->select('a.id_rs,
+						   a.tanggal,
+						   a.id_kat_tabung,
+						   a.total_stok_tabung');
+		$this->db->from('ta_stok_tabung a');
+		$this->db->where('a.tanggal', $date);
+		$this->db->where('a.id_rs', $rs);
+		$this->db->where('a.id_kat_tabung', $tabung);
+		$query = $this->db->get();
 		return $query->row_array();
 	}
 
@@ -122,17 +141,34 @@ class Model_stok_tabung extends CI_Model
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
+		$params      	 	= escape($this->input->post('param', TRUE));
+		$id_rs       		= escape($this->input->post('id_rs', TRUE));
+		$tanggal       		= date_convert(escape($this->input->post('tanggal', TRUE)));
 
-		$tanggal	= date_convert(escape($this->input->post('tanggal', TRUE)));
-
-			$data = array(
-				'tanggal'				=> $tanggal,
-				'total_stok_tabung'		=> escape($this->input->post('total_stok_tabung', TRUE)),
-				'id_rs'					=> escape($this->input->post('id_rs', TRUE)),
-				'id_kat_tabung'			=> escape($this->input->post('id_kat_tabung', TRUE))
-			);
-			$this->db->insert('ta_stok_tabung', $data);
+		$this->db->where('id_rs', $id_rs);
+		$this->db->where('tanggal', $tanggal);
+		$qTot = $this->db->count_all_results('ta_rs_kamar');
+		if($qTot > 0)
+			return array('message'=>'ERROR');
+		else {
+			$arrKamar = array();
+			foreach ($params as $key => $v) {
+				$arrKamar[] = array(
+					'id_rs' 			=> $id_rs,
+					'tanggal' 			=> $tanggal,
+					'id_kat_tabung'	 	=> $key,
+					'total_stok_tabung'	=> $v,
+					'create_by'	 		=> $create_by,
+					'create_date' 		=> $create_date,
+					'create_ip'	 		=> $create_ip,
+					'mod_by'	 		=> $create_by,
+					'mod_date' 			=> $create_date,
+					'mod_ip'	 		=> $create_ip
+				);
+			}
+			$this->db->insert_batch('ta_stok_tabung', $arrKamar);
 			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
+		}
 	}
 
 	public function updateData()
@@ -140,22 +176,28 @@ class Model_stok_tabung extends CI_Model
 		$create_by    		= $this->app_loader->current_account();
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
-		$id_stok_tabung		= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$params       		= escape($this->input->post('param', TRUE));
+		$id_rs				= $this->encryption->decrypt(escape($this->input->post('rsId', TRUE)));
+		$publishDate  		= escape($this->input->post('publishDate', TRUE));
 		//cek data
-		$dataVaksin 	    = $this->getDataDetail($id_stok_tabung);
-		$tanggal  			= !empty($dataVaksin) ? $dataVaksin['tanggal'] : '';
-		if(count($dataVaksin) <= 0)
-			return array('message'=>'ERROR', 'tanggal'=>$tanggal);
+		$dataTabung 	    	= $this->getDataDetail($id_rs, $publishDate);
+		if(count($dataTabung) <= 0)
+			return array('message'=>'ERROR');
 		else {
+			foreach ($params as $key => $v) {
 				$data = array(
-					'tanggal'				=> date_convert(escape($this->input->post('tanggal', TRUE))),
-					'total_stok_tabung'		=> escape($this->input->post('total_stok_tabung', TRUE)),
-					'id_rs'					=> escape($this->input->post('id_rs', TRUE)),
-					'id_kat_tabung'			=> escape($this->input->post('id_kat_tabung', TRUE))
+					'total_stok_tabung'	 	=> $v,
+					'tanggal'	 			=> date_convert(escape($this->input->post('tanggal', TRUE))),
+					'mod_by'	 			=> $create_by,
+					'mod_date' 	 			=> $create_date,
+					'mod_ip'	 			=> $create_ip
 				);
-			$this->db->where('id_stok_tabung', $id_stok_tabung);
-			$this->db->update('ta_stok_tabung', $data);
-			return array('message'=>'SUCCESS', 'tanggal'=>$tanggal);
+				$this->db->where('id_rs', $id_rs);
+				$this->db->where('id_kat_tabung', $key);
+				$this->db->where('tanggal', $publishDate);
+				$this->db->update('ta_stok_tabung', $data);
+			}
+			return array('message'=>'SUCCESS');
 		}
 	}
 

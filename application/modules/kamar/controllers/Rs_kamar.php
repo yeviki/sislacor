@@ -23,10 +23,10 @@ class Rs_kamar extends SLP_Controller {
 		$this->breadcrumb->add('Ketersedaan Kamar', '#');
 		// $this->session_info['list_id_kat_kamar']   	= $this->mmas->getDataKamar();
 		$this->session_info['list_kamar']   	= $this->mRsKamar->getDataKategoriKamar();
-		$this->session_info['list_id_rs']   		= $this->mmas->getDataMasterHospital();
+		$this->session_info['list_id_rs']   	= $this->mmas->getDataMasterHospital();
 		$this->session_info['page_name'] = "Ketersedaan Kamar";
 
-    	$this->template->build('rs_kamar/vlist_new', $this->session_info);
+    	$this->template->build('rs_kamar/vlist', $this->session_info);
 	}
 
 	public function listview()
@@ -34,21 +34,27 @@ class Rs_kamar extends SLP_Controller {
 		if (!$this->input->is_ajax_request()) {
    		exit('No direct script access allowed');
 		} else {
-			$data = array();
+			$data    = array();
+			$rsud 	 = array();
+			$kamar   = array();
 			$session = $this->app_loader->current_account();
 			if(isset($session)){
 				$param = $this->input->post('param',TRUE);
-		    	$dataList = $this->mRsKamar->get_datatables($param);
+				$dataList  = $this->mRsKamar->get_datatables($param);
+				$dataKamar = $this->mRsKamar->getDataKategoriKamar();
 				$no = $this->input->post('start');
-				foreach ($dataList as $key => $dl) {
+				foreach ($dataList as $key => $k) {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal'];
-							$row[] = $dl['shortname'];
-							$row[] = $dl['rekap'];
-					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_rs']).'" data-date="'.$dl['tanggal'].'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_rs']).'" title="Delete"><i class="fa fa-times"></i> </button>';
+					$row[] = tgl_indo($k['tanggal']);
+					$row[] = $k['shortname'];
+					foreach ($dataKamar as $room => $dk) {
+						$total = $this->mRsKamar->getTotalKamar($k['tanggal'], $k['id_rs'], $dk['id_kat_kamar']);
+						$row[] = !empty($total['total_kamar']) ? $total['total_kamar'] : 0;
+					}
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Edit"><i class="fa fa-pencil"></i> </button>
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
@@ -76,8 +82,10 @@ class Rs_kamar extends SLP_Controller {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
 					$data = $this->mRsKamar->insertData();
-					if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data capaian vaksin pada tanggal <b>'.$data['tanggal'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
+					if($data['message'] == 'ERROR') {
+						$result = array('status' => 0, 'message' => array('isi' => 'Proses simpan data gagal, data pada tanggal tersebut sudah ada...'), 'csrfHash' => $csrfHash);
+					} else if($data['message'] == 'SUCCESS') {
+						$result = array('status' => 1, 'message' => 'Data stok kamar pada tanggal <b>'.$data['tanggal'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -98,13 +106,13 @@ class Rs_kamar extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_rs  		= $this->input->post('regencyId', TRUE);
+			$id_rs  		= $this->input->post('rsId', TRUE);
 			$tanggal 		= $this->input->post('publishDate', TRUE);
 			if(!empty($id_rs) AND !empty($session)) {
 				$data = $this->mRsKamar->getDataDetail($this->encryption->decrypt($id_rs), $tanggal);
 				// print_r($data);
 				// die; 	
-				$test = array('id_rs' => $this->encryption->decrypt($id_rs), 'tanggal' => $tanggal);
+				$data_show = array('id_rs' => $this->encryption->decrypt($id_rs), 'tanggal' => date('d/m/Y', strtotime($tanggal)));
 				$row = array(); $no=1;
 				foreach ($data as $key => $val) {
 					$row['no'] 				= $no;
@@ -113,14 +121,11 @@ class Rs_kamar extends SLP_Controller {
 					$hasil[] = $row;
 					$no++;
 				}
-
 				// print_r($hasil); die;
-				$result = array('status' => 1, 'message' => $hasil, 'detail' => $test, 'csrfHash' => $csrfHash);
+				$result = array('status' => 1, 'message' => $hasil, 'detail' => $data_show, 'csrfHash' => $csrfHash);
 			} else {
 				$result = array('status' => 0, 'message' => array(), 'csrfHash' => $csrfHash);
 			}
-				
-
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
 	}
@@ -132,16 +137,17 @@ class Rs_kamar extends SLP_Controller {
 		} else {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
-			$id_rs_kamar  = $this->input->post('vaksinId', TRUE);
-			if(!empty($session) AND !empty($id_rs_kamar)) {
+			$param    = $this->input->post('param', TRUE);
+			$rs_id    = escape($this->input->post('rsId', TRUE));
+			if(!empty($session) AND !empty($rs_id) AND !empty($param)) {
 				if($this->mRsKamar->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
 					$data = $this->mRsKamar->updateData();
-					if($data['message'] == 'NODATA') {
+					if($data['message'] == 'ERROR') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data dengan <b>'.$data['tanggal'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data dengan berhasil diperbaharui...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
@@ -158,8 +164,8 @@ class Rs_kamar extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_rs_kamar 	= escape($this->input->post('vaksinId', TRUE));
-			if(!empty($session) AND !empty($id_rs_kamar)) {
+			$rs_id 			= escape($this->input->post('rsId', TRUE));
+			if(!empty($session) AND !empty($rs_id)) {
 				$data = $this->mRsKamar->deleteData();
 				if($data['message'] == 'ERROR') {
 					$result = array('status' => 0, 'message' => 'Proses delete data gagal dikarenakan data tidak ditemukan...', 'csrfHash' => $csrfHash);

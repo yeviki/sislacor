@@ -20,10 +20,10 @@ class Stok_tabung extends SLP_Controller {
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Oksigen', '#');
-		$this->breadcrumb->add('Stok Tabung', '#');
-		$this->session_info['list_id_kat_tabung']   	= $this->mmas->getDataKatTabung();
-		$this->session_info['list_id_rs']   			= $this->mmas->getDataMasterHospital();
-		$this->session_info['page_name'] = "Stok Tabung";
+		$this->breadcrumb->add('Stok Oksigen', '#');
+		$this->session_info['list_tabung']   	= $this->mSOksigen->getDataKatTabung();
+		$this->session_info['list_id_rs']   	= $this->mmas->getDataMasterHospital();
+		$this->session_info['page_name'] = "Stok Oksigen";
 
     	$this->template->build('stok_tabung/vlist', $this->session_info);
 	}
@@ -33,22 +33,26 @@ class Stok_tabung extends SLP_Controller {
 		if (!$this->input->is_ajax_request()) {
    		exit('No direct script access allowed');
 		} else {
-			$data = array();
+			$data    = array();
+			$rsud 	 = array();
 			$session = $this->app_loader->current_account();
 			if(isset($session)){
 				$param = $this->input->post('param',TRUE);
-		    	$dataList = $this->mSOksigen->get_datatables($param);
+				$dataList  	= $this->mSOksigen->get_datatables($param);
+				$dataTabung = $this->mSOksigen->getDataKatTabung();
 				$no = $this->input->post('start');
-				foreach ($dataList as $key => $dl) {
+				foreach ($dataList as $key => $k) {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal'];
-							$row[] = rujukan($dl['id_rs']);
-							$row[] = tabung($dl['id_kat_tabung']);
-							$row[] = format_ribuan($dl['total_stok_tabung']);
-					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($dl['id_stok_tabung']).'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($dl['id_stok_tabung']).'" title="Delete"><i class="fa fa-times"></i> </button>';
+					$row[] = tgl_indo($k['tanggal']);
+					$row[] = $k['shortname'];
+					foreach ($dataTabung as $room => $dk) {
+						$total = $this->mSOksigen->getTotalTabung($k['tanggal'], $k['id_rs'], $dk['id_kat_tabung']);
+						$row[] = !empty($total['total_stok_tabung']) ? $total['total_stok_tabung'] : 0;
+					}
+					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Edit"><i class="fa fa-pencil"></i> </button>
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
@@ -76,7 +80,9 @@ class Stok_tabung extends SLP_Controller {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
 					$data = $this->mSOksigen->insertData();
-					if($data['message'] == 'SUCCESS') {
+					if($data['message'] == 'ERROR') {
+						$result = array('status' => 0, 'message' => array('isi' => 'Proses simpan data gagal, data pada tanggal tersebut sudah ada...'), 'csrfHash' => $csrfHash);
+					} else if($data['message'] == 'SUCCESS') {
 						$result = array('status' => 1, 'message' => 'Data stok tabung pada tanggal <b>'.$data['tanggal'].'</b> berhasil ditambahkan...', 'csrfHash' => $csrfHash);
 					}
 				}
@@ -89,27 +95,35 @@ class Stok_tabung extends SLP_Controller {
 
 	public function details()
 	{
+		// print_r($_POST);
+		// exit; 	
 		if (!$this->input->is_ajax_request()) {
-   		exit('No direct script access allowed');
-		} else {
-			$session  		= $this->app_loader->current_account();
-			$csrfHash 		= $this->security->get_csrf_hash();
-			$id_stok_tabung  = $this->input->post('vaksinId', TRUE);
-			if(!empty($id_stok_tabung) AND !empty($session)) {
-				$data = $this->mSOksigen->getDataDetail($this->encryption->decrypt($id_stok_tabung));
-				$row = array();
-				$row['id_stok_tabung']		=	!empty($data) ? $data['id_stok_tabung'] : '';
-				$row['total_stok_tabung']	=	!empty($data) ? $data['total_stok_tabung'] : '';
-				$row['id_rs']				=	!empty($data) ? $data['id_rs'] : '';
-				$row['id_kat_tabung']		=	!empty($data) ? $data['id_kat_tabung'] : '';
-				$row['tanggal']				= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal'])) : '';
-
-				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);
-			} else {
-				$result = array('status' => 0, 'message' => array(), 'csrfHash' => $csrfHash);
-			}
-			$this->output->set_content_type('application/json')->set_output(json_encode($result));
-		}
+			exit('No direct script access allowed');
+		 } else {
+			 $session  		= $this->app_loader->current_account();
+			 $csrfHash 		= $this->security->get_csrf_hash();
+			 $id_rs  		= $this->input->post('rsId', TRUE);
+			 $tanggal 		= $this->input->post('publishDate', TRUE);
+			 if(!empty($id_rs) AND !empty($session)) {
+				 $data = $this->mSOksigen->getDataDetail($this->encryption->decrypt($id_rs), $tanggal);
+				 // print_r($data);
+				 // die; 	
+				 $data_show = array('id_rs' => $this->encryption->decrypt($id_rs), 'tanggal' => date('d/m/Y', strtotime($tanggal)));
+				 $row = array(); $no=1;
+				 foreach ($data as $key => $val) {
+					 $row['no'] 				= $no;
+					 $row['nm_tabung']			= $val['nm_tabung'];
+					 $row['total_stok_tabung']	= $val['total_stok_tabung'];
+					 $hasil[] = $row;
+					 $no++;
+				 }
+				 // print_r($hasil); die;
+				 $result = array('status' => 1, 'message' => $hasil, 'detail' => $data_show, 'csrfHash' => $csrfHash);
+			 } else {
+				 $result = array('status' => 0, 'message' => array(), 'csrfHash' => $csrfHash);
+			 }
+			 $this->output->set_content_type('application/json')->set_output(json_encode($result));
+		 }
 	}
 
 	public function update()
@@ -119,16 +133,17 @@ class Stok_tabung extends SLP_Controller {
 		} else {
 			$session  = $this->app_loader->current_account();
 			$csrfHash = $this->security->get_csrf_hash();
-			$id_stok_tabung  = $this->input->post('vaksinId', TRUE);
-			if(!empty($session) AND !empty($id_stok_tabung)) {
+			$param    = $this->input->post('param', TRUE);
+			$rs_id    = escape($this->input->post('rsId', TRUE));
+			if(!empty($session) AND !empty($rs_id) AND !empty($param)) {
 				if($this->mSOksigen->validasiDataValue() == FALSE) {
 					$result = array('status' => 0, 'message' => $this->form_validation->error_array(), 'csrfHash' => $csrfHash);
 				} else {
 					$data = $this->mSOksigen->updateData();
-					if($data['message'] == 'NODATA') {
+					if($data['message'] == 'ERROR') {
 						$result = array('status' => 0, 'message' => array('isi' => 'Proses update data gagal, data yang akan diupdate tidak ditemukan. Mohon diperiksa kembali data yang akan diupdate...'), 'csrfHash' => $csrfHash);
 					} else if($data['message'] == 'SUCCESS') {
-						$result = array('status' => 1, 'message' => 'Data dengan tanggal <b>'.$data['tanggal'].'</b> berhasil diperbaharui...', 'csrfHash' => $csrfHash);
+						$result = array('status' => 1, 'message' => 'Data berhasil diperbaharui...', 'csrfHash' => $csrfHash);
 					}
 				}
 			} else {
