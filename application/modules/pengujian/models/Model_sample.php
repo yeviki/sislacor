@@ -27,7 +27,7 @@ class Model_sample extends CI_Model
 			return true;
 	}
 
-	var $search = array('tanggal', 'regency_id');
+	var $search = array('tanggal', 'regency');
 	public function get_datatables($param)
 	{
 		$this->_get_datatables_query($param);
@@ -120,7 +120,6 @@ class Model_sample extends CI_Model
 				'tanggal_spesimen'		=> $tanggal_spesimen,
 				'total_spesimen'		=> escape($this->input->post('total_spesimen', TRUE)),
 				'total_pemeriksaan'		=> escape($this->input->post('total_pemeriksaan', TRUE)),
-				'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
 				'regency_id'			=> escape($this->input->post('regency_id', TRUE))
 			);
 			$this->db->insert('ta_spesimen_sample', $data);

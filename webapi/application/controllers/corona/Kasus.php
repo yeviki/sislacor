@@ -94,6 +94,36 @@ class Kasus extends REST_Controller {
             'result' => 'No data were found'
             ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
         }
-	}
+    }
+    
+    public function grafikkasus_post() {
+
+        $tahun  = $this->post('tahun', TRUE);
+        $bulan  = $this->post('bulan', TRUE);
+
+        $dataGrafikKasus = array();
+        $dataGrafik = $this->mKasus->post_GrafikTotalKasus($tahun, $bulan);
+		foreach ($dataGrafik as $key => $r) {
+            $row['regency_id']                 = $r['regency_id'];
+            $row['name']                       = $r['name'];
+            $row['tanggal']                    = $r['tanggal_kasus'];
+            $row['grafik_total_positif']       = format_ribuan($r['total_positif']);
+            $row['grafik_total_sembuh']        = format_ribuan($r['total_sembuh']);
+            $row['grafik_total_meninggal']     = format_ribuan($r['total_meninggal']);
+            $dataGrafikKasus[]       = $row;
+        }
+
+        if(count($dataGrafik) > 0) {
+            $this->response([
+            'response' => 'RC200',
+            'result' => $dataGrafikKasus
+            ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
+        } else {
+            $this->response([
+            'response' => 'RC404',
+            'result' => 'No data were found'
+            ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
+        }
+    }
 
 }

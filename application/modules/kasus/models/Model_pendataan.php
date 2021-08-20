@@ -27,7 +27,7 @@ class Model_pendataan extends CI_Model
 			return true;
 	}
 
-	var $search = array('tanggal', 'regency_id');
+	var $search = array('tanggal', 'regency');
 	public function get_datatables($param)
 	{
 		$this->_get_datatables_query($param);
@@ -74,8 +74,8 @@ class Model_pendataan extends CI_Model
 		$this->db->from('ta_kasus a');
 		
 		// Kab/Kota
-		if(isset($post['regency_id']) AND $post['regency_id'] != '')
-			$this->db->where('a.regency_id', $post['regency_id']);
+		if(isset($post['regency']) AND $post['regency'] != '')
+			$this->db->where('a.regency_id', $post['regency']);
 		// Tanggal kasus Masuk
         if(isset($post['tanggal']) AND $post['tanggal'] != ''){
 			$this->db->where('DATE_FORMAT(a.tanggal_kasus, "%m/%d/%Y")', $post['tanggal']);

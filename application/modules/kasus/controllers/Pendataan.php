@@ -98,6 +98,7 @@ class Pendataan extends SLP_Controller {
 				$data = $this->mPendataan->getDataDetail($this->encryption->decrypt($id_kasus));
 				$row = array();
 				$row['id_kasus']			=	!empty($data) ? $data['id_kasus'] : '';
+				$row['regency_id']			=	!empty($data) ? $data['regency_id'] : '';
 				$row['total_positif']		=	!empty($data) ? $data['total_positif'] : '';
 				$row['total_sembuh']		=	!empty($data) ? $data['total_sembuh'] : '';
 				$row['total_meninggal']		=	!empty($data) ? $data['total_meninggal'] : '';
@@ -158,6 +159,71 @@ class Pendataan extends SLP_Controller {
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
 	}
+
+	public function uploadexcel()
+    {
+        include APPPATH . 'third_party/PHPExcel.php';
+        $create_by   	= $this->app_loader->current_account();
+        $create_date 	= gmdate('Y-m-d H:i:s', time() + 60 * 60 * 7);
+        $create_ip   	= $this->input->ip_address();
+        $csrfHash 		= $this->security->get_csrf_hash();
+        $namafile  		= $_FILES['file']['name'];
+        $lokasi    		= $_FILES['file']['tmp_name'];
+        move_uploaded_file($lokasi, './repository/temporary/' . $namafile);
+        $excelreader     	= new PHPExcel_Reader_Excel2007();
+        $spreadsheet 		= $excelreader->load('repository/temporary/' . $namafile);
+        $sheetdata 			= $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        echo "<pre>";
+        print_r($sheetdata);
+        echo "</pre>";
+        exit;
+        $dataexcel = array();
+
+        $numrow = 2;
+        foreach ($sheetdata as $row) {
+            if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
+                array_push($dataexcel, array(
+                    'tanggal_'         => $row['A'],
+                    'nama'              => $row['B'],
+                    'npsn'              => $row['C'],
+                    'sekolah_province'  => $row['D'],
+                    'sekolah_regency'   => $row['E'],
+                    'sekolah_district'  => $row['F'],
+                    'sekolah_village'   => $row['G'],
+                    'sekolah_domisili'  => $row['H'],
+                    'sekolah_asrama'  => $row['I'],
+                    'sekolah_negeri'  => $row['J'],
+                    'lat'               => $row['K'],
+                    'long'              => $row['L'],
+                    'create_by'         => $create_by,
+                    'create_ip'         => $create_ip,
+                    'mod_by'            => $create_by,
+                    'mod_date'          => $create_date,
+                    'mod_ip'            => $create_ip,
+                ));
+            }
+            $numrow++;
+        }
+
+        $response =  $this->db->insert_batch('ms_sekolah', $dataexcel);
+        if ($response == true) {
+            unlink(realpath('tmp_excel/' . $namafile));
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Berhasil Di Simpan',
+                'response' => true
+            );
+            return $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($json_data));
+        } else {
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Gagal Disimpan',
+                'response' => false
+            );
+            return $this->output->set_status_header(422)->set_content_type('application/json')->set_output(json_encode($json_data));
+        }
+    }
 }
 
 // This is the end of home class

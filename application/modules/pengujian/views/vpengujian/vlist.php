@@ -38,8 +38,8 @@
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group required">
-                    <label for="regency_id" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('regency_id', $list_regency_id, $this->input->post('regency_id'), 'class="select-all" id="regency_id"');?>
+                    <label for="regency" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('regency', $list_regency_id, $this->input->post('regency'), 'class="select-all" id="regency"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>

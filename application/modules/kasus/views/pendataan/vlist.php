@@ -24,6 +24,10 @@
               <a href="javascript:void(0);" class="btnFilter" style="text-decoration:none;color:#000000;">
                 <i class="fa fa-sliders"></i> Filter Data
               </a>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <a href="javascript:void(0);" class="btnUpload" style="text-decoration:none;color:#000000;">
+                <i class="fa fa-sliders"></i> Upload Excel
+              </a>
             </h3>
           </div>
           <!-- <div class="pull-right">
@@ -38,8 +42,8 @@
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group required">
-                    <label for="regency_id" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('regency_id', $list_regency_id, $this->input->post('regency_id'), 'class="select-all" id="regency_id"');?>
+                    <label for="regency" class="control-label"><b>Kabupaten/Kota <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('regency', $list_regency_id, $this->input->post('regency'), 'class="select-all" id="regency"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
@@ -71,6 +75,37 @@
             </div>
           <?php echo form_close(); ?>
         </div>
+
+        <div class="col-xs-12 col-sm-12">
+          <?php echo form_open(site_url('#'), array('id'=>'formUpload', 'style'=>'display:none;margin-bottom:20px;')); ?>
+            <div style="display:block;background:#FFF;padding:20px;border:1px solid #CCC;box-shadow:0px 0px 10px #CCC;">
+              <div class="row">
+                <div class="col-xs-12 col-sm-3">
+                  <div class="form-group">
+                    <label for="">
+                      <input type="file" name="fileToUpload" id="fileToUpload" class="form-control">
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="pull-left">
+                    <div class="btn-toolbar">
+                      <button type="button" class="btn btn-danger" name="cancel" id="cancel"><i class="fa fa-refresh"></i> CANCEL</button>
+                    </div>
+                  </div>
+                  <div class="pull-right">
+                    <div class="btn-toolbar">
+                      <button type="button" class="btn btn-default btnUpload" name="button"><i class="fa fa-times"></i> CLOSE</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php echo form_close(); ?>
+        </div>
+
       </div>
     </div>
     <div class="col-xs-12 col-sm-12">
@@ -200,6 +235,11 @@
 
   $(document).on('click', '.btnFilter', function(e){
     $('#formFilter').slideToggle('slow');
+    $('.select-all').select2('val', '');
+  });
+
+  $(document).on('click', '.btnUpload', function(e){
+    $('#formUpload').slideToggle('slow');
     $('.select-all').select2('val', '');
   });
 
@@ -344,6 +384,50 @@
       }
     });
   });
+
+  $(document).on('submit', '#formupload', function(e) {
+        e.preventDefault();
+        const file = $('#file').prop('files')[0];
+        var token = $('input[name="' + csrfName + '"]').val()
+        let form_data = new FormData();
+        form_data.append('file', file);
+        form_data.append('<?php echo $this->security->get_csrf_token_name() ?>', token);
+
+        $.ajax({
+            url: site + '/upload',
+            type: 'post',
+            data: form_data,
+            //untuk input data dengan gambar jangan lupaa proces data dan content type
+            processData: false,
+            contentType: false,
+        }).done(function(res) {
+            console.log(res)
+            $('input[name="' + csrfName + '"]').val(res.csrfHash);
+            console.log(res)
+            datalist.ajax.reload()
+            alert(res.message)
+        }).fail(function(e) {
+            console.log(e)
+        })
+
+    })
+
+    $('#file').change(function(event) {
+        let type = event.target.files[0].type
+        let _size = event.target.files[0].size;
+        if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            Swal.fire('File Bukan Excel')
+            $('#file').val('')
+        }
+        if (_size >= 1555555) {
+            Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
+            $('#file').val('')
+        }
+    })
+
+    $(document).on('click', '#showUpload', function(e) {
+        $('#formupload').slideToggle('slow');
+    })
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
