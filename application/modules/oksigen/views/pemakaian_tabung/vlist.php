@@ -26,6 +26,13 @@
               </a>
             </h3>
           </div>
+          <div class="pull-right">
+            <h3 style="font-weight:bold;text-align:right;">
+              <a href="javascript:void(0);" class="btnUpload" style="text-decoration:none;color:#000000;">
+                <i class="fa fa-sliders"></i> Upload Excel
+              </a>
+            </h3>
+          </div>
           <!-- <div class="pull-right">
             <div class="btn-toolbar">
               <button type="button" class="btn btn-success" id="printExcel"><i class="fa fa-file-excel-o"></i> EXPORT KE EXCEL </button>
@@ -44,17 +51,10 @@
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-3">
-                  <div class="form-group required">
-                    <label for="id_tabung" class="control-label"><b>Kategori <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('id_tabung', $list_id_kat_tabung, $this->input->post('id_tabung'), 'class="select-all" id="id_tabung"');?>
-                    <div class="help-block"></div>
-                  </div>
-                </div>
-                <div class="col-xs-12 col-sm-3">
                     <div class="form-group">
-                        <label for="tanggal" class="control-label"><b>Pilih Tanggal <font color="red" size="1em">(*)</font></b></label>
+                        <label for="search_tanggal" class="control-label"><b>Pilih Tanggal <font color="red" size="1em">(*)</font></b></label>
                         <div class="input-group date datemonth">
-                          <input type="text" class="form-control mask" name="tanggal" id="tanggal" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal', TRUE); ?>">
+                          <input type="text" class="form-control mask" name="search_tanggal" id="search_tanggal" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('search_tanggal', TRUE); ?>">
                           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                         </div>
                     </div>
@@ -78,6 +78,38 @@
             </div>
           <?php echo form_close(); ?>
         </div>
+
+        <div class="col-xs-12 col-sm-12">
+          <?php echo form_open(site_url('#'), array('id' => 'formupload', 'style'=>'display:none;margin-bottom:20px;')); ?>
+            <div style="display:block;background:#FFF;padding:20px;border:1px solid #CCC;box-shadow:0px 0px 10px #CCC;">
+              <div class="row">
+                <div class="col-xs-12 col-sm-3">
+                  <div class="form-group">
+                    <label for="file" class="control-label"><b>Silahkan upload template disini..</b></label>
+                      <input type="file" name="file" id="file" class="form-control">
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="pull-left">
+                    <div class="btn-toolbar">
+                      <button type="submit" class="btn btn-primary" id="uploadExcel"><i class="fa fa-upload"></i> IMPORT</button>
+                      <button type="button" class="btn btn-danger download"><i class="fa fa-download"></i> DOWNLOAD TEMPLATE</button>
+                    </div>
+                  </div>
+                  <div class="pull-right">
+                    <div class="btn-toolbar">
+                      <button type="button" class="btn btn-default btnUpload" name="button"><i class="fa fa-times"></i> CLOSE</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php echo form_close(); ?>
+        </div>
+
       </div>
     </div>
     <div class="col-xs-12 col-sm-12">
@@ -91,10 +123,11 @@
               <thead>
                 <tr>
                   <th width="3%">#</th>
-                  <th width="17%">Tanggal</th>
-                  <th width="17%">Rumah Sakit</th>
-                  <th width="17%">Kategori</th>
-                  <th width="17%">Total Tabung</th>
+                  <th width="10%">Tanggal</th>
+                  <th width="12%">Rumah Sakit</th>
+                  <?php foreach ($list_tabung as $key => $k): ?>
+                    <th width="12%"><?php echo $k['nm_tabung']; ?></th>
+                  <?php endforeach; ?>
                   <th width="5%">Action</th>
                 </tr>
               </thead>
@@ -107,7 +140,7 @@
 </div><!-- container -->
 
 <div class="modal fade in" id="modalEntryForm" tabindex="-1" role="dialog" aria-labelledby="modalEntryLabel" aria-hidden="true">
-  <div class="modal-dialog modal-md" id="frmEntry">
+  <div class="modal-dialog modal-lg" id="frmEntry">
     <div class="modal-content">
       <div class="modal-header" style="padding:10px 15px 10px 15px;">
         <button type="button" class="close btnClose" aria-hidden="true">&times;</button>
@@ -117,34 +150,54 @@
       <div class="modal-body" style="padding:15px 15px 5px 15px;">
         <div id="errEntry"></div>
           <div class="row">
-            <div class="col-xs-12 col-sm-12">
+          <?php
+              echo form_input(array('type'=>'hidden', 'name'=>'rsId', 'id'=>'idRs'));
+              echo form_input(array('type'=>'hidden', 'name'=>'publishDate', 'id'=>'datetanggal'));
+            ?>
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group required">
-                <label for="id_stok_tabung" class="control-label"><b> Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
-                <?php echo form_dropdown('id_stok_tabung', $list_pemakaian_tabung, $this->input->post('id_stok_tabung'), 'class="select-all" id="id_stok_tabung"');?>
+                <label for="id_rs" class="control-label"><b>Rumah Sakit <font color="red" size="1em">(*)</font></b></label>
+                <?php echo form_dropdown('id_rs', $list_id_rs, $this->input->post('id_rs'), 'class="select-all" id="id_rs"');?>
+                <div class="help-block"></div>
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group required">
+                <label for="tanggal" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
+                  <div class="input-group date datemonth">
+                    <input type="text" class="form-control mask" name="tanggal" id="tanggal" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal', TRUE); ?>">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <?php echo form_error('tanggal'); ?>
                 <div class="help-block"></div>
               </div>
             </div>
           </div>
-          <div class="row">
-            <?php echo form_hidden('vaksinId', ''); ?>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="total_terpakai" class="control-label" style="font-size:15px;"><b>Total Pemakaian <font color="red" size="1em">(*)</font></b></label>
-                <input type="text" class="form-control nominal" name="total_terpakai" id="total_terpakai" placeholder="Total" value="<?php echo $this->input->post('total_terpakai', TRUE); ?>">
-                <div class="help-block"></div>
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group required">
-                <label for="tanggal_pemakaian" class="control-label"><b>Tanggal <font color="red" size="1em">(*)</font></b></label>
-                  <div class="input-group date datemonth">
-                    <input type="text" class="form-control mask" name="tanggal_pemakaian" id="tanggal_pemakaian" placeholder="dd/mm/yyyy" data-inputmask="'alias': 'date'" value="<?php echo $this->input->post('tanggal_pemakaian', TRUE); ?>">
-                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                  </div>
-                  <?php echo form_error('tanggal_pemakaian'); ?>
-                <div class="help-block"></div>
-              </div>
-            </div>
+          <div class="table-responsive">
+            <table cellspacing="0" cellpadding="0" class="table table-striped table-bordered" width="100%" id="tblOtgInput">
+              <thead>
+                <tr>
+                  <th width="3%">No.</th>
+                  <th width="77%">Jenis Tabung</th>
+                  <th width="20%">Pemakaian</th>
+                  <th width="20%">Persediaan</th>
+                </tr>
+              </thead>
+              <tbody>
+              <?php $i=1; foreach ($list_tabung as $key => $k): ?>
+                <tr>
+                  <td><?php echo $i; ?>.</td>
+                  <td id="<?php echo 'nm_tabung_'.$i; ?>"><?php echo $k['nm_tabung']; ?></td>
+                  <td>
+                    <input type="text" class="form-control nominal" name="param[<?php echo $k['id_kat_tabung']; ?>]" id="<?php echo 'tot_jum_pakai'.$i; ?>" placeholder="Jumlah Tabung" value="<?php echo set_value('param['.$k['id_kat_tabung'].']', ''); ?>" required="" oninvalid="this.setCustomValidity('Inputan wajib diisi')" oninput="setCustomValidity('')">
+                  </td>
+                  <td>
+                    <input type="text" disabled class="form-control nominal" name="[<?php echo $k['id_kat_tabung']; ?>]" id="<?php echo 'tot_jum_stok'.$i; ?>" placeholder="Stok" value="<?php echo set_value('['.$k['id_kat_tabung'].']', ''); ?>" required="" oninvalid="this.setCustomValidity('Inputan wajib diisi')" oninput="setCustomValidity('')">
+                  </td>
+                </tr>
+              <?php $i++; endforeach; ?>
+              </tbody>
+            </table>
           </div>
       </div>
       <div class="modal-footer" style="margin-top:0px;padding:10px 15px 15px 0px;">
@@ -254,6 +307,7 @@
     $('#formEntry').attr('action', site + 'oksigen/pemakaian-tabung/create');
     $('#errEntry').html('');
     $('.select-all').select2('val', '');
+    $('#id_rs').attr('disabled', false);
     $('#status').select2('val', 1);
     $('.help-block').text('');
     $('.required').removeClass('has-error');
@@ -316,9 +370,6 @@
                                         '</div>');
                   $('#modalEntryForm').modal('toggle');
                   getDataList();
-                  setTimeout(function(){
-                    window.location.reload(1);
-                  }, 1000);
                 }
                 $('#frmEntry').waitMe('hide');
               }).fail(function() {
@@ -337,40 +388,82 @@
     });
   });
 
-  $(document).on('click', '.btnEdit', function(e){
-    formReset();
-    $('#formEntry').attr('action', site + 'oksigen/pemakaian-tabung/update');
-    var id_pemakaian_tabung = $(this).data('id');
-    $('#modalEntryForm').modal({
-      backdrop: 'static'
-    });
-    getDataTabung(id_pemakaian_tabung);
+  $(document).on('change', '#id_rs', function(e) {
+    let id = $(this).val();
+    getPersediaan(id);
   });
 
-  function getDataTabung(id_pemakaian_tabung) {
-    run_waitMe($('#frmEntry'));
+  //mengambil data stok
+  function getPersediaan(id) {
+    var postData = {
+      'rsId'   : id,
+      '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()
+    };
     $.ajax({
       type: 'POST',
-      url: site + 'oksigen/pemakaian-tabung/details',
-      data: {'vaksinId' : id_pemakaian_tabung, '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()},
+      url: site + 'oksigen/pemakaian-tabung/review',
+      data: postData,
       dataType: 'json',
       success: function(data) {
+        // console.log(data);
         $('input[name="'+csrfName+'"]').val(data.csrfHash);
-        if(data.status == 1) {
-          $('input[name="vaksinId"]').val(id_pemakaian_tabung);
-          $('#total_terpakai').val(data.message.total_terpakai);
-          $('#tanggal_pemakaian').val(data.message.tanggal_pemakaian);
-          $('#id_stok_tabung').select2('val', data.message.id_stok_tabung).trigger('change');
-        }
-        $('#frmEntry').waitMe('hide');
+        if(data.status != 0) {
+          let no = 1;
+          $.each(data.message, function(key,value){
+            $('#tblOtgInput > tbody > tr').find('td > #tot_jum_stok'+no).val(value['sisa_tabung']);
+            no++;
+          });
+        } 
       }
     });
   }
 
+  //set button edit
+  $(document).on('click', '.btnEdit', function(e){
+    formReset();
+    $('#formEntry').attr('action', site + 'oksigen/pemakaian-tabung/update');
+    var rsId   = $(this).data('id');
+    var tanggal = $(this).data('date');
+    $('#modalEntryForm').modal({
+      backdrop: 'static'
+    });
+    $('#id_rs').attr('disabled', true);
+    $('#idRs').val(rsId);
+    $('#datetanggal').val(tanggal);
+    var postData = {
+      'rsId'   : rsId,
+      'publishDate' : tanggal,
+      '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()
+    };
+    run_waitMe($('#frmEntry'));
+    $.ajax({
+      type: 'POST',
+      url: site + 'oksigen/pemakaian-tabung/details',
+      data: postData,
+      dataType: 'json',
+      success: function(data) {
+        console.log(data);
+        $('input[name="'+csrfName+'"]').val(data.csrfHash);
+        if(data.status != 0) {
+          $('#id_rs').select2('val', data.detail.id_rs).trigger('change');
+          $('#tanggal').val(data.detail.tanggal_pemakaian);
+          let no = 1;
+          $.each(data.message, function(key,value){
+            $('#tblOtgInput > tbody > tr').find('td#nm_tabung_'+no).text(value['nm_tabung']);
+            $('#tblOtgInput > tbody > tr').find('td > #tot_jum_pakai'+no).val(value['total_terpakai']);
+            no++;
+          });
+        }
+        $('#frmEntry').waitMe('hide');
+      }
+    });
+  });
+
   $(document).on('click', '.btnDelete', function(e){
     e.preventDefault();
     var postData = {
-      'vaksinId': $(this).data('id'),
+      'rsId': $(this).data('id'),
+      'publishDate': $(this).data('date'),
       '<?php echo $this->security->get_csrf_token_name(); ?>' : $('input[name="'+csrfName+'"]').val()
     };
     $(this).html('<i class="fa fa-hourglass-half"></i>');
@@ -429,6 +522,55 @@
         }
       }
     });
+  });
+
+  $(document).on('submit', '#formupload', function(e) {
+      e.preventDefault();
+      const file = $('#file').prop('files')[0];
+      var token = $('input[name="' + csrfName + '"]').val()
+      let form_data = new FormData();
+      form_data.append('file', file);
+      form_data.append('<?php echo $this->security->get_csrf_token_name() ?>', token);
+
+      $.ajax({
+          url: site + 'oksigen/pemakaian-tabung/upload',
+          type: 'post',
+          data: form_data,
+          //untuk input data dengan gambar jangan lupaa proces data dan content type
+          processData: false,
+          contentType: false,
+      }).done(function(res) {
+          $('input[name="' + csrfName + '"]').val(res.csrfHash);
+          console.log(res);
+          getDataList();
+          alert(res.message)
+      }).fail(function(e) {
+          console.log(e)
+      })
+
+  })
+
+  $('#file').change(function(event) {
+      let type = event.target.files[0].type
+      let _size = event.target.files[0].size;
+      if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+          Swal.fire('File Bukan Excel')
+          $('#file').val('')
+      }
+      if (_size >= 1555555) {
+          Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
+          $('#file').val('')
+      }
+  })
+
+  $(document).on('click', '.btnUpload', function(e){
+    $('#formupload').slideToggle('slow');
+    $('.select-all').select2('val', '');
+  });
+
+  $(document).on('click', '.download', function(e){
+      url = site + '/repository/template/import_data_pemakaian_oksigen.xlsx';
+      window.location.href = url;
   });
 
   $(document).on('keypress keyup', '.nominal',function (e) {

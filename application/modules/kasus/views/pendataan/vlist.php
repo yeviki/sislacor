@@ -24,7 +24,10 @@
               <a href="javascript:void(0);" class="btnFilter" style="text-decoration:none;color:#000000;">
                 <i class="fa fa-sliders"></i> Filter Data
               </a>
-              &nbsp;&nbsp;&nbsp;&nbsp;
+            </h3>
+          </div>
+          <div class="pull-right">
+            <h3 style="font-weight:bold;text-align:right;">
               <a href="javascript:void(0);" class="btnUpload" style="text-decoration:none;color:#000000;">
                 <i class="fa fa-sliders"></i> Upload Excel
               </a>
@@ -77,13 +80,13 @@
         </div>
 
         <div class="col-xs-12 col-sm-12">
-          <?php echo form_open(site_url('#'), array('id'=>'formUpload', 'style'=>'display:none;margin-bottom:20px;')); ?>
+          <?php echo form_open(site_url('kasus/pendataan/upload'), array('id' => 'formupload', 'style'=>'display:none;margin-bottom:20px;')); ?>
             <div style="display:block;background:#FFF;padding:20px;border:1px solid #CCC;box-shadow:0px 0px 10px #CCC;">
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <div class="form-group">
-                    <label for="">
-                      <input type="file" name="fileToUpload" id="fileToUpload" class="form-control">
+                    <label for="file" class="control-label"><b>Silahkan upload template disini..</b></label>
+                      <input type="file" name="file" id="file" class="form-control">
                     </label>
                   </div>
                 </div>
@@ -92,7 +95,8 @@
                 <div class="col-xs-12">
                   <div class="pull-left">
                     <div class="btn-toolbar">
-                      <button type="button" class="btn btn-danger" name="cancel" id="cancel"><i class="fa fa-refresh"></i> CANCEL</button>
+                      <button type="submit" class="btn btn-primary" id="uploadExcel"><i class="fa fa-upload"></i> IMPORT</button>
+                      <button type="button" class="btn btn-danger download"><i class="fa fa-download"></i> DOWNLOAD TEMPLATE</button>
                     </div>
                   </div>
                   <div class="pull-right">
@@ -239,7 +243,7 @@
   });
 
   $(document).on('click', '.btnUpload', function(e){
-    $('#formUpload').slideToggle('slow');
+    $('#formupload').slideToggle('slow');
     $('.select-all').select2('val', '');
   });
 
@@ -394,7 +398,7 @@
         form_data.append('<?php echo $this->security->get_csrf_token_name() ?>', token);
 
         $.ajax({
-            url: site + '/upload',
+            url: site + 'kasus/pendataan/upload',
             type: 'post',
             data: form_data,
             //untuk input data dengan gambar jangan lupaa proces data dan content type
@@ -404,30 +408,28 @@
             console.log(res)
             $('input[name="' + csrfName + '"]').val(res.csrfHash);
             console.log(res)
-            datalist.ajax.reload()
+            getDataList();
             alert(res.message)
         }).fail(function(e) {
             console.log(e)
         })
 
-    })
+  })
 
-    $('#file').change(function(event) {
-        let type = event.target.files[0].type
-        let _size = event.target.files[0].size;
-        if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            Swal.fire('File Bukan Excel')
-            $('#file').val('')
-        }
-        if (_size >= 1555555) {
-            Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
-            $('#file').val('')
-        }
-    })
+  $('#file').change(function(event) {
+      let type = event.target.files[0].type
+      let _size = event.target.files[0].size;
+      if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+          Swal.fire('File Bukan Excel')
+          $('#file').val('')
+      }
+      if (_size >= 1555555) {
+          Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
+          $('#file').val('')
+      }
+  })
 
-    $(document).on('click', '#showUpload', function(e) {
-        $('#formupload').slideToggle('slow');
-    })
+    
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
@@ -524,6 +526,11 @@
       }
     });
   });
+
+  $(document).on('click', '.download', function(e){
+        url = site + '/repository/template/import_data_kasus.xlsx';
+        window.location.href = url;
+    });
 
   $(document).on('keypress keyup', '.nominal',function (e) {
     if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {

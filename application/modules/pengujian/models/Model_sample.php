@@ -120,7 +120,13 @@ class Model_sample extends CI_Model
 				'tanggal_spesimen'		=> $tanggal_spesimen,
 				'total_spesimen'		=> escape($this->input->post('total_spesimen', TRUE)),
 				'total_pemeriksaan'		=> escape($this->input->post('total_pemeriksaan', TRUE)),
-				'regency_id'			=> escape($this->input->post('regency_id', TRUE))
+				'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
+				'create_by'				=> $create_by,
+				'create_date'			=> $create_date,
+				'create_ip'				=> $create_ip,
+				'mod_by'				=> $create_by,
+				'mod_date'				=> $create_date,
+				'mod_ip'				=> $create_ip
 			);
 			$this->db->insert('ta_spesimen_sample', $data);
 			return array('message'=>'SUCCESS', 'tanggal_spesimen'=>$tanggal_spesimen);
@@ -142,7 +148,10 @@ class Model_sample extends CI_Model
 					'tanggal_spesimen'		=> date_convert(escape($this->input->post('tanggal_spesimen', TRUE))),
 					'total_spesimen'		=> escape($this->input->post('total_spesimen', TRUE)),
 					'total_pemeriksaan'		=> escape($this->input->post('total_pemeriksaan', TRUE)),
-					'regency_id'			=> escape($this->input->post('regency_id', TRUE))
+					'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
+					'mod_by'				=> $create_by,
+					'mod_date'				=> $create_date,
+					'mod_ip'				=> $create_ip
 				);
 			$this->db->where('id_spesimen_sample', $id_spesimen_sample);
 			$this->db->update('ta_spesimen_sample', $data);

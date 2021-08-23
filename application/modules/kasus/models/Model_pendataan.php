@@ -121,7 +121,13 @@ class Model_pendataan extends CI_Model
 				'total_positif'			=> escape($this->input->post('total_positif', TRUE)),
 				'total_sembuh'			=> escape($this->input->post('total_sembuh', TRUE)),
 				'total_meninggal'		=> escape($this->input->post('total_meninggal', TRUE)),
-				'regency_id'			=> escape($this->input->post('regency_id', TRUE))
+				'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
+				'create_by'				=> $create_by,
+				'create_date'			=> $create_date,
+				'create_ip'				=> $create_ip,
+				'mod_by'				=> $create_by,
+				'mod_date'				=> $create_date,
+				'mod_ip'				=> $create_ip
 			);
 			$this->db->insert('ta_kasus', $data);
 			return array('message'=>'SUCCESS', 'tanggal_kasus'=>$tanggal_kasus);
@@ -144,7 +150,10 @@ class Model_pendataan extends CI_Model
 					'total_positif'			=> escape($this->input->post('total_positif', TRUE)),
 					'total_sembuh'			=> escape($this->input->post('total_sembuh', TRUE)),
 					'total_meninggal'		=> escape($this->input->post('total_meninggal', TRUE)),
-					'regency_id'			=> escape($this->input->post('regency_id', TRUE))
+					'regency_id'			=> escape($this->input->post('regency_id', TRUE)),
+					'mod_by'				=> $create_by,
+					'mod_date'				=> $create_date,
+					'mod_ip'				=> $create_ip
 				);
 			$this->db->where('id_kasus', $id_kasus);
 			$this->db->update('ta_kasus', $data);

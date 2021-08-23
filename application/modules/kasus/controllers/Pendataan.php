@@ -160,7 +160,7 @@ class Pendataan extends SLP_Controller {
 		}
 	}
 
-	public function uploadexcel()
+	public function upload()
     {
         include APPPATH . 'third_party/PHPExcel.php';
         $create_by   	= $this->app_loader->current_account();
@@ -174,29 +174,24 @@ class Pendataan extends SLP_Controller {
         $spreadsheet 		= $excelreader->load('repository/temporary/' . $namafile);
         $sheetdata 			= $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
 
-        echo "<pre>";
-        print_r($sheetdata);
-        echo "</pre>";
-        exit;
+        // echo "<pre>";
+        // print_r($sheetdata);
+        // echo "</pre>";
+		// exit;
+		
         $dataexcel = array();
-
-        $numrow = 2;
+        $numrow = 1;
         foreach ($sheetdata as $row) {
-            if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
+			if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
+				$pecah = explode('-', $row['B']);
                 array_push($dataexcel, array(
-                    'tanggal_'         => $row['A'],
-                    'nama'              => $row['B'],
-                    'npsn'              => $row['C'],
-                    'sekolah_province'  => $row['D'],
-                    'sekolah_regency'   => $row['E'],
-                    'sekolah_district'  => $row['F'],
-                    'sekolah_village'   => $row['G'],
-                    'sekolah_domisili'  => $row['H'],
-                    'sekolah_asrama'  => $row['I'],
-                    'sekolah_negeri'  => $row['J'],
-                    'lat'               => $row['K'],
-                    'long'              => $row['L'],
+                    'tanggal_kasus'     => $row['A'],
+                    'regency_id'        => trim($pecah[0]),
+                    'total_sembuh'      => $row['C'],
+                    'total_positif'  	=> $row['D'],
+                    'total_meninggal'   => $row['E'],
                     'create_by'         => $create_by,
+                    'create_date'       => $create_date,
                     'create_ip'         => $create_ip,
                     'mod_by'            => $create_by,
                     'mod_date'          => $create_date,
@@ -206,9 +201,9 @@ class Pendataan extends SLP_Controller {
             $numrow++;
         }
 
-        $response =  $this->db->insert_batch('ms_sekolah', $dataexcel);
+        $response =  $this->db->insert_batch('ta_kasus', $dataexcel);
         if ($response == true) {
-            unlink(realpath('tmp_excel/' . $namafile));
+            unlink(realpath('repository/temporary/' . $namafile));
             $json_data = array(
                 'csrfnew' => $csrfHash,
                 'message' => 'Berhasil Di Simpan',

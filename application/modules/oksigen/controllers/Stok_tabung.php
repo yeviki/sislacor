@@ -174,6 +174,65 @@ class Stok_tabung extends SLP_Controller {
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
 	}
+
+	public function upload()
+    {
+        include APPPATH . 'third_party/PHPExcel.php';
+        $create_by   	= $this->app_loader->current_account();
+        $create_date 	= gmdate('Y-m-d H:i:s', time() + 60 * 60 * 7);
+        $create_ip   	= $this->input->ip_address();
+        $csrfHash 		= $this->security->get_csrf_hash();
+        $namafile  		= $_FILES['file']['name'];
+        $lokasi    		= $_FILES['file']['tmp_name'];
+        move_uploaded_file($lokasi, './repository/temporary/' . $namafile);
+        $excelreader     	= new PHPExcel_Reader_Excel2007();
+        $spreadsheet 		= $excelreader->load('repository/temporary/' . $namafile);
+        $sheetdata 			= $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        // echo "<pre>";
+        // print_r($sheetdata);
+        // echo "</pre>";
+		// die;
+		$dataexcel = array();
+		$kategori = $this->mSOksigen->getDataKatTabung();
+		if(count($sheetdata) > 0) {
+			for ($i=3; $i <= count($sheetdata) ; $i++) { 
+				$pecah = explode('-', $sheetdata[$i]['B']);
+				$j = 'C';
+				foreach ($kategori as $key => $k) {
+					$dataexcel[] = array(
+						'tanggal'  			=> $sheetdata[$i]['A'],
+						'id_rs'        		=> trim($pecah[0]),
+						'id_kat_tabung'    	=> $k['id_kat_tabung'],
+						'total_stok_tabung' => $sheetdata[$i][$j],
+						'create_by'         => $create_by,
+						'create_date'       => $create_date,
+						'create_ip'         => $create_ip,
+						'mod_by'            => $create_by,
+						'mod_date'          => $create_date,
+						'mod_ip'            => $create_ip,
+					);
+					$j++;
+				}
+			}
+		}
+        $response =  $this->db->insert_batch('ta_stok_tabung', $dataexcel);
+        if ($response == true) {
+            unlink(realpath('repository/temporary/' . $namafile));
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Berhasil Di Simpan',
+                'response' => true
+            );
+            return $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($json_data));
+        } else {
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Gagal Disimpan',
+                'response' => false
+            );
+            return $this->output->set_status_header(422)->set_content_type('application/json')->set_output(json_encode($json_data));
+        }
+    }
 }
 
 // This is the end of home class

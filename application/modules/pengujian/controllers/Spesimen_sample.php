@@ -157,6 +157,65 @@ class Spesimen_sample extends SLP_Controller {
 			$this->output->set_content_type('application/json')->set_output(json_encode($result));
 		}
 	}
+
+	public function upload()
+    {
+        include APPPATH . 'third_party/PHPExcel.php';
+        $create_by   	= $this->app_loader->current_account();
+        $create_date 	= gmdate('Y-m-d H:i:s', time() + 60 * 60 * 7);
+        $create_ip   	= $this->input->ip_address();
+        $csrfHash 		= $this->security->get_csrf_hash();
+        $namafile  		= $_FILES['file']['name'];
+        $lokasi    		= $_FILES['file']['tmp_name'];
+        move_uploaded_file($lokasi, './repository/temporary/' . $namafile);
+        $excelreader     	= new PHPExcel_Reader_Excel2007();
+        $spreadsheet 		= $excelreader->load('repository/temporary/' . $namafile);
+        $sheetdata 			= $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        // echo "<pre>";
+        // print_r($sheetdata);
+        // echo "</pre>";
+		// exit;
+		
+        $dataexcel = array();
+        $numrow = 1;
+        foreach ($sheetdata as $row) {
+			if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
+				$pecah = explode('-', $row['B']);
+                array_push($dataexcel, array(
+                    'tanggal_spesimen'  => $row['A'],
+                    'regency_id'        => trim($pecah[0]),
+                    'total_spesimen'    => $row['C'],
+                    'total_pemeriksaan' => $row['D'],
+                    'create_by'         => $create_by,
+                    'create_date'       => $create_date,
+                    'create_ip'         => $create_ip,
+                    'mod_by'            => $create_by,
+                    'mod_date'          => $create_date,
+                    'mod_ip'            => $create_ip,
+                ));
+            }
+            $numrow++;
+        }
+
+        $response =  $this->db->insert_batch('ta_spesimen_sample', $dataexcel);
+        if ($response == true) {
+            unlink(realpath('repository/temporary/' . $namafile));
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Berhasil Di Simpan',
+                'response' => true
+            );
+            return $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($json_data));
+        } else {
+            $json_data = array(
+                'csrfnew' => $csrfHash,
+                'message' => 'Gagal Disimpan',
+                'response' => false
+            );
+            return $this->output->set_status_header(422)->set_content_type('application/json')->set_output(json_encode($json_data));
+        }
+    }
 }
 
 // This is the end of home class
