@@ -407,29 +407,27 @@
         }).done(function(res) {
             console.log(res)
             $('input[name="' + csrfName + '"]').val(res.csrfHash);
-            console.log(res)
+            // console.log(res)
             getDataList();
             alert(res.message)
+            $('#file').val('')
         }).fail(function(e) {
-            console.log(e)
+            // console.log(e)
         })
-
   })
 
   $('#file').change(function(event) {
       let type = event.target.files[0].type
       let _size = event.target.files[0].size;
       if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-          Swal.fire('File Bukan Excel')
+          alert('File Bukan Excel')
           $('#file').val('')
       }
       if (_size >= 1555555) {
-          Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
+          alert(`File Terlalu Besar, Max 1.55 MB `)
           $('#file').val('')
       }
   })
-
-    
 
   $(document).on('click', '.btnEdit', function(e){
     formReset();
@@ -530,7 +528,7 @@
   $(document).on('click', '.download', function(e){
         url = site + '/repository/template/import_data_kasus.xlsx';
         window.location.href = url;
-    });
+  });
 
   $(document).on('keypress keyup', '.nominal',function (e) {
     if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {

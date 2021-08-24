@@ -181,12 +181,11 @@ class Spesimen_sample extends SLP_Controller {
         $numrow = 1;
         foreach ($sheetdata as $row) {
 			if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
-				$pecah = explode('-', $row['B']);
                 array_push($dataexcel, array(
-                    'tanggal_spesimen'  => $row['A'],
-                    'regency_id'        => trim($pecah[0]),
-                    'total_spesimen'    => $row['C'],
-                    'total_pemeriksaan' => $row['D'],
+                    'tanggal_spesimen'  => $row['A'] ? $row['A'] : '',
+                    'regency_id'        => explode(' - ', $row['B'])[0],
+                    'total_spesimen'    => $row['C'] ? $row['C'] : '0',
+                    'total_pemeriksaan' => $row['D'] ? $row['D'] : '0',
                     'create_by'         => $create_by,
                     'create_date'       => $create_date,
                     'create_ip'         => $create_ip,

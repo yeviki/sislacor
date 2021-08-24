@@ -183,13 +183,12 @@ class Pendataan extends SLP_Controller {
         $numrow = 1;
         foreach ($sheetdata as $row) {
 			if ($numrow > 2) { // kalau row ke satu di excel adalah nama th table
-				$pecah = explode('-', $row['B']);
                 array_push($dataexcel, array(
-                    'tanggal_kasus'     => $row['A'],
-                    'regency_id'        => trim($pecah[0]),
-                    'total_sembuh'      => $row['C'],
-                    'total_positif'  	=> $row['D'],
-                    'total_meninggal'   => $row['E'],
+                    'tanggal_kasus'     => $row['A'] ? $row['A'] : '',
+                    'regency_id'        => explode(' - ', $row['B'])[0],
+                    'total_sembuh'      => $row['C'] ? $row['C'] : '0',
+                    'total_positif'  	=> $row['D'] ? $row['D'] : '0',
+                    'total_meninggal'   => $row['E'] ? $row['E'] : '0',
                     'create_by'         => $create_by,
                     'create_date'       => $create_date,
                     'create_ip'         => $create_ip,

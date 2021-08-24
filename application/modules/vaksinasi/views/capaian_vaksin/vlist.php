@@ -26,6 +26,13 @@
               </a>
             </h3>
           </div>
+          <div class="pull-right">
+            <h3 style="font-weight:bold;text-align:right;">
+              <a href="javascript:void(0);" class="btnUpload" style="text-decoration:none;color:#000000;">
+                <i class="fa fa-sliders"></i> Upload Excel
+              </a>
+            </h3>
+          </div>
           <!-- <div class="pull-right">
             <div class="btn-toolbar">
               <button type="button" class="btn btn-success" id="printExcel"><i class="fa fa-file-excel-o"></i> EXPORT KE EXCEL </button>
@@ -78,6 +85,38 @@
             </div>
           <?php echo form_close(); ?>
         </div>
+
+        <div class="col-xs-12 col-sm-12">
+          <?php echo form_open(site_url('vaksinasi/capaian-vaksin/upload'), array('id' => 'formupload', 'style'=>'display:none;margin-bottom:20px;')); ?>
+            <div style="display:block;background:#FFF;padding:20px;border:1px solid #CCC;box-shadow:0px 0px 10px #CCC;">
+              <div class="row">
+                <div class="col-xs-12 col-sm-3">
+                  <div class="form-group">
+                    <label for="file" class="control-label"><b>Silahkan upload template disini..</b></label>
+                      <input type="file" name="file" id="file" class="form-control">
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="pull-left">
+                    <div class="btn-toolbar">
+                      <button type="submit" class="btn btn-primary" id="uploadExcel"><i class="fa fa-upload"></i> IMPORT</button>
+                      <button type="button" class="btn btn-danger download"><i class="fa fa-download"></i> DOWNLOAD TEMPLATE</button>
+                    </div>
+                  </div>
+                  <div class="pull-right">
+                    <div class="btn-toolbar">
+                      <button type="button" class="btn btn-default btnUpload" name="button"><i class="fa fa-times"></i> CLOSE</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php echo form_close(); ?>
+        </div>
+
       </div>
     </div>
     <div class="col-xs-12 col-sm-12">
@@ -433,6 +472,56 @@
       }
     });
   });
+
+  $(document).on('click', '.btnUpload', function(e){
+    $('#formupload').slideToggle('slow');
+    $('.select-all').select2('val', '');
+  });
+
+  $(document).on('click', '.download', function(e){
+        url = site + '/repository/template/import_data_capaian_vaksin.xlsx';
+        window.location.href = url;
+  });
+
+  $(document).on('submit', '#formupload', function(e) {
+        e.preventDefault();
+        const file = $('#file').prop('files')[0];
+        var token = $('input[name="' + csrfName + '"]').val()
+        let form_data = new FormData();
+        form_data.append('file', file);
+        form_data.append('<?php echo $this->security->get_csrf_token_name() ?>', token);
+
+        $.ajax({
+            url: site + 'vaksinasi/capaian-vaksin/upload',
+            type: 'post',
+            data: form_data,
+            //untuk input data dengan gambar jangan lupaa proces data dan content type
+            processData: false,
+            contentType: false,
+        }).done(function(res) {
+            console.log(res)
+            $('input[name="' + csrfName + '"]').val(res.csrfHash);
+            // console.log(res)
+            getDataList();
+            alert(res.message)
+            $('#file').val('')
+        }).fail(function(e) {
+            // console.log(e)
+        })
+  })
+
+  $('#file').change(function(event) {
+      let type = event.target.files[0].type
+      let _size = event.target.files[0].size;
+      if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+          alert('File Bukan Excel')
+          $('#file').val('')
+      }
+      if (_size >= 1555555) {
+          alert(`File Terlalu Besar, Max 1.55 MB `)
+          $('#file').val('')
+      }
+  })
 
   $(document).on('keypress keyup', '.nominal',function (e) {
     if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {

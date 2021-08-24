@@ -480,9 +480,13 @@ $config['csrf_exclude_uris'] = array( 'manajemen/users/listview','otg/listview',
                                       'vaksinasi/suplai-vaksin/listview',
                                       'vaksinasi/capaian-vaksin/listview',
                                       'kamar/rs-kamar/listview',
+                                      'kamar/rs-kamar/details',
                                       'kamar/pemakaian-kamar/listview',
+                                      'kamar/pemakaian-kamar/details',
                                       'oksigen/stok-tabung/listview',
+                                      'oksigen/stok-tabung/details',
                                       'oksigen/pemakaian-tabung/listview',
+                                      'oksigen/pemakaian-tabung/details',
                                       'kasus/pendataan/listview',
                                       'pengujian/spesimen-sample/listview'
                                     );

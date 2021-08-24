@@ -196,14 +196,13 @@ class Stok_tabung extends SLP_Controller {
 		$kategori = $this->mSOksigen->getDataKatTabung();
 		if(count($sheetdata) > 0) {
 			for ($i=3; $i <= count($sheetdata) ; $i++) { 
-				$pecah = explode('-', $sheetdata[$i]['B']);
 				$j = 'C';
 				foreach ($kategori as $key => $k) {
 					$dataexcel[] = array(
-						'tanggal'  			=> $sheetdata[$i]['A'],
-						'id_rs'        		=> trim($pecah[0]),
+						'tanggal'  			=> $sheetdata[$i]['A'] ? $sheetdata[$i]['A'] : '',
+						'id_rs'        		=> explode(' - ', $sheetdata[$i]['B'])[0],
 						'id_kat_tabung'    	=> $k['id_kat_tabung'],
-						'total_stok_tabung' => $sheetdata[$i][$j],
+						'total_stok_tabung' => $sheetdata[$i][$j] ? $sheetdata[$i][$j] : '0',
 						'create_by'         => $create_by,
 						'create_date'       => $create_date,
 						'create_ip'         => $create_ip,

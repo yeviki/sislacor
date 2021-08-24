@@ -401,11 +401,12 @@
           contentType: false,
       }).done(function(res) {
           $('input[name="' + csrfName + '"]').val(res.csrfHash);
-          console.log(res);
+          // console.log(res);
           getDataList();
           alert(res.message)
+          $('#file').val('')
       }).fail(function(e) {
-          console.log(e)
+          // console.log(e)
       })
 
   })
@@ -414,11 +415,11 @@
       let type = event.target.files[0].type
       let _size = event.target.files[0].size;
       if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-          Swal.fire('File Bukan Excel')
+          alert('File Bukan Excel')
           $('#file').val('')
       }
       if (_size >= 1555555) {
-          Swal.fire(`File Terlalu Besar, Max 1.55 MB `)
+          alert(`File Terlalu Besar, Max 1.55 MB `)
           $('#file').val('')
       }
   })
