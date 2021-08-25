@@ -26,13 +26,13 @@
               </a>
             </h3>
           </div>
-          <div class="pull-right">
+          <!-- <div class="pull-right">
             <h3 style="font-weight:bold;text-align:right;">
               <a href="javascript:void(0);" class="btnUpload" style="text-decoration:none;color:#000000;">
                 <i class="fa fa-sliders"></i> Upload Excel
               </a>
             </h3>
-          </div>
+          </div> -->
           <!-- <div class="pull-right">
             <div class="btn-toolbar">
               <button type="button" class="btn btn-success" id="printExcel"><i class="fa fa-file-excel-o"></i> EXPORT KE EXCEL </button>
