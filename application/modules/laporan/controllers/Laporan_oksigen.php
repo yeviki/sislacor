@@ -20,25 +20,23 @@ class Laporan_oksigen extends SLP_Controller {
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Laporan', '#');
-		$this->breadcrumb->add('Pengujian', '#');
-		$this->session_info['list_regency_id']   = $this->mmas->getDataRegency();
-		$this->session_info['page_name'] = "Laporan Pengujian";
+		$this->breadcrumb->add('Oksigen', '#');
+		$this->session_info['list_id_rs']  = $this->mmas->getDataMasterHospital();
+		$this->session_info['page_name'] = "Laporan Oksigen";
 
     	$this->template->build('vlap_oksigen/vlist', $this->session_info);
 	}
 
 	public function export_to_excel()
 	{
-		// $regency_id		= escape($this->input->get('regency_id', TRUE));
-		// $start_date		= escape($this->input->get('start_date', TRUE));
-		// $end_date		= escape($this->input->get('end_date', TRUE));
+		$id_rs		= escape($this->input->get('rs_id', TRUE));
+		$start_date		= escape($this->input->get('start_date', TRUE));
+		$end_date		= escape($this->input->get('end_date', TRUE));
 		// die($typeReport);
-		// if($typeReport == '1') {
-		// 	$this->laporan_biasa($lokasi, $pemasok, $start_date, $end_date);
+		//  if ($typeReport == '1') {
+			$this->history_pemakaian_harian($id_rs, $start_date, $end_date);
 		// } else if ($typeReport == '2') {
-		// 	$this->invoice($lokasi, $pemasok, $start_date, $end_date);
-		// } else if ($typeReport == '3') {
-			$this->rekap_persediaan();
+		// 	$this->rekap_persediaan($id_rs, $start_date, $end_date);
 		// }
 	}
 	
@@ -268,7 +266,7 @@ class Laporan_oksigen extends SLP_Controller {
 	}
 	
 
-	private function history_pemakaian_harian() 
+	private function history_pemakaian_harian($id_rs, $start_date, $end_date) 
 	{
 		// $regency_id		= escape($this->input->get('regency_id', TRUE));
 		// $start_date		= escape($this->input->get('start_date', TRUE));
@@ -282,13 +280,13 @@ class Laporan_oksigen extends SLP_Controller {
 			$kategori_oksigen[$ca['id_kat_tabung']] = $ca['nm_tabung'];
 		}
 
-		$dataOksigen = $this->mLapOksigen->getDataPemakaian();
+		$dataOksigen = $this->mLapOksigen->getDataPemakaian($id_rs, $start_date, $end_date);
 		$cell = array(); $hasil = array();
 		foreach ($dataOksigen as $mt) {
 			$cell[] = $mt;
 		}
 
-		$datatransaksi = $this->mLapOksigen->get_transaksi_tabung();
+		$datatransaksi = $this->mLapOksigen->get_transaksi_tabung($id_rs, $start_date, $end_date);
 		$log_transaksi = array();
 		foreach ($datatransaksi as $dlt) {
 			$log_transaksi[$dlt['tanggal_pemakaian']][$dlt['id_rs']][$dlt['id_kat_tabung']] = $dlt['total_terpakai'];
@@ -404,7 +402,7 @@ class Laporan_oksigen extends SLP_Controller {
 		}
 
 		$excel->getActiveSheet()->mergeCellsByColumnAndRow(0, 1, $merge+2, 1);
-		$excel->getActiveSheet()->setCellValueByColumnAndRow(0, 1, 'LAPORAN DATA PERSEDIAAN OKSIGEN');
+		$excel->getActiveSheet()->setCellValueByColumnAndRow(0, 1, 'LAPORAN DATA PEMAKAIAN OKSIGEN');
 		$excel->getActiveSheet()->getStyleByColumnAndRow(0, 1, $merge+2, 1)->applyFromArray($style_header);
 
 		$excel->getActiveSheet()->mergeCellsByColumnAndRow(0, 2, $merge+2, 2);

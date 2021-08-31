@@ -100,11 +100,11 @@
 
   //cetak laporan excel bagi Supplier
   $(document).on('click', '#cetakExcel', function(e){
-    let rs          = $('#formFilter').find('select[name="id_rs"]').val();
+    let rs  = $('#formFilter').find('select[name="id_rs"]').val();
     let start_date  = $('#formFilter').find('input[name="start_date"]').val();
     let end_date    = $('#formFilter').find('input[name="end_date"]').val();
 
-    url = site + 'laporan/laporan-oksigen/export-to-excel?rs_id='+rs+'&start_date='+start_date+'&end_date='+end_date;
+    url = site + 'laporan/laporan-kamar/export-to-excel?rs_id='+rs+'&start_date='+start_date+'&end_date='+end_date;
     // url = site + 'laporan/laporan-oksigen/export-to-excel';
     window.location.href = url;
   });

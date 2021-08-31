@@ -6,7 +6,7 @@
  * @author Yogi "solop" Kaputra
  */
 
-class Model_lap_oksigen extends CI_Model
+class Model_lap_kamar extends CI_Model
 {
 	protected $_publishDate = "";
 	public function __construct()
@@ -16,10 +16,10 @@ class Model_lap_oksigen extends CI_Model
 
 	public function getKategori()
 	{
-		$this->db->select('a.id_kat_tabung,
-							a.nm_tabung,
+		$this->db->select('a.id_kat_kamar,
+							a.nm_kamar,
 							');
-		$this->db->from('ref_kat_tabung a');
+		$this->db->from('ref_kat_kamar a');
     	$query = $this->db->get();
     	return $query->result_array();
 	}
@@ -29,10 +29,10 @@ class Model_lap_oksigen extends CI_Model
 		// $arrDate = explode(' - ', $tanggal);
 		$this->db->select('a.tanggal_pemakaian,
 							b.fullname as shortname,
-							a.id_kat_tabung,
+							a.id_kat_kamar,
 							a.id_rs
 							');
-		$this->db->from('ta_pemakaian_tabung a');
+		$this->db->from('ta_pemakaian_kamar a');
 		$this->db->join('ms_rs_rujukan b ','a.id_rs=b.id_rs','left');
 		$this->db->ORDER_BY('b.fullname ASC');
 		$this->db->group_by(array('a.id_rs', 'a.tanggal_pemakaian'));
@@ -44,16 +44,16 @@ class Model_lap_oksigen extends CI_Model
 		return $query->result_array();
 	}
 
-	public function get_transaksi_tabung($id_rs, $start_date, $end_date)
+	public function get_transaksi_kamar($id_rs, $start_date, $end_date)
 	{
 		$this->db->select('a.tanggal_pemakaian,
 							b.id_rs,
-							a.id_kat_tabung,
+							a.id_kat_kamar,
 							a.total_terpakai
 							');
-		$this->db->from('ta_pemakaian_tabung a');
+		$this->db->from('ta_pemakaian_kamar a');
 		$this->db->join('ms_rs_rujukan b ','a.id_rs=b.id_rs','left');
-		$this->db->group_by(array('a.tanggal_pemakaian', 'a.id_kat_tabung','a.id_rs'));
+		$this->db->group_by(array('a.tanggal_pemakaian', 'a.id_kat_kamar','a.id_rs'));
 		$this->db->ORDER_BY('b.fullname ASC');
 		if($id_rs != '')
 			$this->db->where('b.id_rs', $id_rs);
