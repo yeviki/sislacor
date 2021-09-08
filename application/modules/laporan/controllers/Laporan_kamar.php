@@ -48,13 +48,12 @@ class Laporan_kamar extends SLP_Controller {
 		if($start_date != NULL) {
             $setdate = $start_date.' s/d '.$end_date;
         } else {
-            $setdate = 'Keseluruhan';
+            $setdate = 'KESELURUHAN';
         }
 
 		$colomn_kategori = $this->mLapKamar->getKategori();
 		$kategori = array(); $kategori_kamar = array();
 		foreach ($colomn_kategori as $key => $ca) {
-			// echo '<pre>'; print_r($ca); echo '</pre>';
 			$kategori[$ca['id_kat_kamar']][] = $ca;
 			$kategori_kamar[$ca['id_kat_kamar']] = $ca['nm_kamar'];
 		}
@@ -69,6 +68,12 @@ class Laporan_kamar extends SLP_Controller {
 		$log_transaksi = array();
 		foreach ($datatransaksi as $dlt) {
 			$log_transaksi[$dlt['tanggal_pemakaian']][$dlt['id_rs']][$dlt['id_kat_kamar']] = $dlt['total_terpakai'];
+		}
+
+		$dataStok = $this->mLapKamar->get_stok_kamar($id_rs);
+		$log_tersedia = array();
+		foreach ($dataStok as $dltk) {
+			$log_tersedia[$dltk['id_rs']][$dltk['id_kat_kamar']] = $dltk['total_kamar'];
 		}
 		
 		// Load plugin PHPExcel nya
@@ -163,20 +168,29 @@ class Laporan_kamar extends SLP_Controller {
 		);
 
 		// Buat header tabel nya pada baris ke 3
-		$excel->getActiveSheet()->mergeCells('A4:A5');
+		$excel->getActiveSheet()->mergeCells('A4:A6');
 		$excel->setActiveSheetIndex(0)->setCellValue('A4', "NO");
-		$excel->getActiveSheet()->mergeCells('B4:B5');
-		$excel->setActiveSheetIndex(0)->setCellValue('B4', "TANGGAL" .$setdate);
-		$excel->getActiveSheet()->mergeCells('C4:C5');
+		$excel->getActiveSheet()->mergeCells('B4:B6');
+		$excel->setActiveSheetIndex(0)->setCellValue('B4', "TANGGAL");
+		$excel->getActiveSheet()->mergeCells('C4:C6');
 		$excel->setActiveSheetIndex(0)->setCellValue('C4', "RUMAH SAKIT");
 		$col = 3; $i = 2; $cols = 2; $merge=0;
 		foreach ($kategori as $row => $val) {
 			$tot = count($val);
-			$excel->getActiveSheet()->mergeCellsByColumnAndRow($col, 5, $col+$tot-1, 5);
+			$excel->getActiveSheet()->mergeCellsByColumnAndRow($col, 5, $col+($tot*2)-1, 5);
 			$excel->getActiveSheet()->setCellValueByColumnAndRow($col, 5, $kategori_kamar[$row]);
-			$excel->getActiveSheet()->getStyleByColumnAndRow($col, 5, $col+$tot-1, 5)->applyFromArray($style_col);
-			$col += $tot;
-			$merge = $merge + $tot;
+			$excel->getActiveSheet()->getStyleByColumnAndRow($col, 5, $col+($tot*2)-1, 5)->applyFromArray($style_keterangan);
+
+			$excel->getActiveSheet()->mergeCellsByColumnAndRow($col, 6, $col+$tot-1, 6);
+			$excel->getActiveSheet()->setCellValueByColumnAndRow($col, 6, 'TERPAKAI');
+			$excel->getActiveSheet()->getStyleByColumnAndRow($col, 6, $col+$tot-1, 6)->applyFromArray($style_keterangan);
+
+			$excel->getActiveSheet()->mergeCellsByColumnAndRow($col+1, 6, $col+$tot, 6);
+			$excel->getActiveSheet()->setCellValueByColumnAndRow($col+1, 6, 'TERSEDIA');
+			$excel->getActiveSheet()->getStyleByColumnAndRow($col+1, 6, $col+$tot, 6)->applyFromArray($style_keterangan);
+
+			$col += $tot*2;
+			$merge = $merge + ($tot*2);
 			//$i++;
 		}
 
@@ -185,20 +199,18 @@ class Laporan_kamar extends SLP_Controller {
 		$excel->getActiveSheet()->getStyleByColumnAndRow(0, 1, $merge+2, 1)->applyFromArray($style_header);
 
 		$excel->getActiveSheet()->mergeCellsByColumnAndRow(0, 2, $merge+2, 2);
-		$excel->getActiveSheet()->setCellValueByColumnAndRow(0, 2, 'TANGGAL : '.$setdate);
+		$excel->getActiveSheet()->setCellValueByColumnAndRow(0, 2, 'TANGGAL ' .$setdate);
 		$excel->getActiveSheet()->getStyleByColumnAndRow(0, 2, $merge+2, 2)->applyFromArray($style_header);
 
 		$excel->getActiveSheet()->mergeCellsByColumnAndRow(3, 4, $merge+2, 4);
-		$excel->getActiveSheet()->setCellValueByColumnAndRow(3, 4, 'KATEGORI TABUNG');
+		$excel->getActiveSheet()->setCellValueByColumnAndRow(3, 4, 'KATEGORI KAMAR');
 		$excel->getActiveSheet()->getStyleByColumnAndRow(3, 4, $merge+2, 4)->applyFromArray($style_keterangan);
 
 		/*Bagian isi keterangan*/
 		$no=0; 
-		$line=5; 
+		$line=6; 
 		$i= 2;
 		foreach($cell as $key => $c) {
-
-			// die(print_r($c['tanggal_pemakaian']));
 			$no++;
 			//set nomor
 			$excel->getActiveSheet()->mergeCellsByColumnAndRow(0, $line+$no, 0, $line+$no);
@@ -217,23 +229,24 @@ class Laporan_kamar extends SLP_Controller {
 			$tot_samping =0;
 			foreach ($kategori as $row => $val) {
 				foreach ($val as $rows => $a) {
-					// die(print_r($a['id_kat_kamar']));
-					// $skor = isset($log_transaksi[]);
-					// die(print_r($c['tanggal_pemakaian']));
+					$tersedia =isset($log_tersedia[$c['id_rs']][$a['id_kat_kamar']]) ? $log_tersedia[$c['id_rs']][$a['id_kat_kamar']] : '0';
 					$skor =isset($log_transaksi[$c['tanggal_pemakaian']][$c['id_rs']][$a['id_kat_kamar']]) ? $log_transaksi[$c['tanggal_pemakaian']][$c['id_rs']][$a['id_kat_kamar']] : '0';
-					// $skor = isset($hasil[$key]['kategori'][$row]) ? $hasil[$key]['kategori'][$row] : 0;
 					$excel->getActiveSheet()->mergeCellsByColumnAndRow($cols, $line+$no, $cols, $line+$no);
 					$excel->getActiveSheet()->setCellValueByColumnAndRow($cols, $line+$no, $skor)->getColumnDimensionByColumn($cols)->setWidth('28');
 					$excel->getActiveSheet()->getStyleByColumnAndRow($cols, $line+$no, $cols, $line+$no)->applyFromArray($style_content);
-					$cols += 1;
+
+					$excel->getActiveSheet()->mergeCellsByColumnAndRow($cols+1, $line+$no, $cols+1, $line+$no);
+					$excel->getActiveSheet()->setCellValueByColumnAndRow($cols+1, $line+$no, ($tersedia-$skor))->getColumnDimensionByColumn($cols)->setWidth('28');
+					$excel->getActiveSheet()->getStyleByColumnAndRow($cols+1, $line+$no, $cols+1, $line+$no)->applyFromArray($style_content);
+					$cols += 2;
 				}
 			}
 		}
 
 		// Apply style header yang telah kita buat tadi ke masing-masing kolom header
-		$excel->getActiveSheet()->getStyle('A4:A5')->applyFromArray($style_keterangan);
-		$excel->getActiveSheet()->getStyle('B4:B5')->applyFromArray($style_keterangan);
-		$excel->getActiveSheet()->getStyle('C4:C5')->applyFromArray($style_keterangan);
+		$excel->getActiveSheet()->getStyle('A4:A6')->applyFromArray($style_keterangan);
+		$excel->getActiveSheet()->getStyle('B4:B6')->applyFromArray($style_keterangan);
+		$excel->getActiveSheet()->getStyle('C4:C6')->applyFromArray($style_keterangan);
 
 		$excel->getActiveSheet()->getColumnDimension('A')->setWidth(5); // Set width
 		$excel->getActiveSheet()->getColumnDimension('B')->setWidth(25);

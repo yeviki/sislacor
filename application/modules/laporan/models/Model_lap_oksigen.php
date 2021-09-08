@@ -62,6 +62,25 @@ class Model_lap_oksigen extends CI_Model
     	$query = $this->db->get();
 		return $query->result_array();
 	}
+
+	public function get_stok_tabung($id_rs)
+	{
+		$this->db->select('a.id_kat_tabung, 
+						a.id_rs, 
+						SUM(a.total_stok_tabung) AS total_stok_tabung,
+						a.id_kat_tabung,
+						c.shortname, 
+						e.nm_tabung
+					');
+		$this->db->join('ms_rs_rujukan c', 'a.id_rs = c.id_rs', 'inner');
+		$this->db->join('ref_kat_tabung e', 'e.id_kat_tabung = a.id_kat_tabung', 'inner');
+		if($id_rs != '')
+			$this->db->where('a.id_rs', $id_rs);
+		$this->db->group_by('a.id_rs');
+		$this->db->group_by('a.id_kat_tabung');
+		$query = $this->db->get('ta_stok_tabung a');
+		return $query->result_array();
+	}
 }
 
 // This is the end of model

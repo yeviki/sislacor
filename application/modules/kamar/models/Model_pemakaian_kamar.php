@@ -131,10 +131,11 @@ class Model_pemakaian_kamar extends CI_Model
 
 	public function getDataStokKamar($id_rs)
 	{
+		$datenow = gmdate('Y-m-d');
 		$this->db->select('DISTINCT(a.id_kat_kamar), a.id_rs, 
 						SUM(a.total_kamar) AS total_kamar,
 						(SELECT sum(x.total_terpakai) FROM  ta_pemakaian_kamar x WHERE x.id_rs=a.id_rs AND x.id_kat_kamar=a.id_kat_kamar) AS jml_digunakan,
-						IFNULL (((SUM(a.total_kamar))-(SELECT sum(x.total_terpakai) FROM  ta_pemakaian_kamar x WHERE x.id_rs=a.id_rs AND x.id_kat_kamar=a.id_kat_kamar)),SUM(a.total_kamar)) AS sisa_kamar,
+						IFNULL (((SUM(a.total_kamar))-(SELECT x.total_terpakai FROM ta_pemakaian_kamar x WHERE x.id_rs=a.id_rs AND x.id_kat_kamar=a.id_kat_kamar order by x.tanggal_pemakaian desc limit 1)),SUM(a.total_kamar)) AS sisa_kamar,
 						a.id_kat_kamar,
 						a.tanggal,
 						c.shortname, 

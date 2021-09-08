@@ -105,7 +105,7 @@ class Model_pemakaian_tabung extends CI_Model
 		$this->db->select('DISTINCT(a.id_kat_tabung), a.id_rs, 
 						SUM(a.total_stok_tabung) AS total_stok_tabung,
 						(SELECT sum(x.total_terpakai) FROM  ta_pemakaian_tabung x WHERE x.id_rs=a.id_rs AND x.id_kat_tabung=a.id_kat_tabung) AS jml_digunakan,
-						ifnull(((SUM(a.total_stok_tabung)) - (SELECT sum(x.total_terpakai) FROM  ta_pemakaian_tabung x WHERE x.id_rs=a.id_rs AND x.id_kat_tabung=a.id_kat_tabung)),SUM(a.total_stok_tabung)) AS sisa_tabung,
+						ifnull(((SUM(a.total_stok_tabung)) - (SELECT x.total_terpakai FROM  ta_pemakaian_tabung x WHERE x.id_rs=a.id_rs AND x.id_kat_tabung=a.id_kat_tabung order by x.tanggal_pemakaian desc limit 1)),SUM(a.total_stok_tabung)) AS sisa_tabung,
 						a.id_kat_tabung,
 						a.tanggal,
 						c.shortname, 

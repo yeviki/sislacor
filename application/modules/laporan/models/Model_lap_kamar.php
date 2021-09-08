@@ -62,6 +62,25 @@ class Model_lap_kamar extends CI_Model
     	$query = $this->db->get();
 		return $query->result_array();
 	}
+
+	public function get_stok_kamar($id_rs)
+	{
+		$this->db->select('a.id_kat_kamar, 
+						a.id_rs, 
+						SUM(a.total_kamar) AS total_kamar,
+						a.id_kat_kamar,
+						c.shortname, 
+						e.nm_kamar
+					');
+		$this->db->join('ms_rs_rujukan c', 'a.id_rs = c.id_rs', 'inner');
+		$this->db->join('ref_kat_kamar e', 'e.id_kat_kamar = a.id_kat_kamar', 'inner');
+		if($id_rs != '')
+			$this->db->where('a.id_rs', $id_rs);
+		$this->db->group_by('a.id_rs');
+		$this->db->group_by('a.id_kat_kamar');
+		$query = $this->db->get('ta_rs_kamar a');
+		return $query->result_array();
+	}
 }
 
 // This is the end of model
