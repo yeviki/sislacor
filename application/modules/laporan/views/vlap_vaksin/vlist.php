@@ -104,7 +104,7 @@
     let start_date  = $('#formFilter').find('input[name="start_date"]').val();
     let end_date    = $('#formFilter').find('input[name="end_date"]').val();
 
-    url = site + 'laporan/laporan-kasus/export-to-excel?regency_id='+kabkota+'&start_date='+start_date+'&end_date='+end_date;
+    url = site + 'laporan/laporan-vaksinasi/export-to-excel?regency_id='+kabkota+'&start_date='+start_date+'&end_date='+end_date;
     window.location.href = url;
   });
 
