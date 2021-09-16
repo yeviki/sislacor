@@ -140,6 +140,29 @@ class Model_kasus extends CI_Model
 		return $query->result_array();
 	}
 
+	// Grafik Kasus Bulan
+	public function post_GrafikTotalKasusBulan($tahun, $bulan)
+	{
+		$this->db->select('a.id_kasus,
+							a.tanggal_kasus,
+							a.regency_id,
+							a.total_positif,
+							a.total_sembuh,
+							a.total_meninggal,
+							b.name
+                            ');
+		$this->db->from('ta_kasus a');
+		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
+		$this->db->where('year(a.tanggal_kasus)', $tahun);
+		if ($bulan != "") {
+			$this->db->where('month(a.tanggal_kasus)', $bulan);
+		}
+		$this->db->order_by('a.tanggal_kasus');
+		$query = $this->db->get();
+		// echo $this->db->last_query();die;
+		return $query->result_array();
+	}
+
 }
 
 // This is the end of auth signin model
