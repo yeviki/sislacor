@@ -41,7 +41,7 @@ class Pendataan extends SLP_Controller {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal_kasus'];
+							$row[] = tgl_indo($dl['tanggal_kasus']);
 							$row[] = regency($dl['regency_id']);
 							$row[] = $dl['total_sembuh'];
 							$row[] = $dl['total_positif'];

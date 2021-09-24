@@ -20,7 +20,7 @@ class Rs_kamar extends SLP_Controller {
 	{
     	$this->breadcrumb->add('Dashboard', site_url('home'));
     	$this->breadcrumb->add('Kamar', '#');
-		$this->breadcrumb->add('Ketersedaan Kamar', '#');
+		$this->breadcrumb->add('Ketersediaan Kamar', '#');
 		// $this->session_info['list_id_kat_kamar']   	= $this->mmas->getDataKamar();
 		$this->session_info['list_kamar']   	= $this->mRsKamar->getDataKategoriKamar();
 		$this->session_info['list_id_rs']   	= $this->mmas->getDataMasterHospital();
@@ -54,7 +54,7 @@ class Rs_kamar extends SLP_Controller {
 						$row[] = !empty($total['total_kamar']) ? $total['total_kamar'] : 0;
 					}
 					$row[] = '<button type="button" class="btn btn-xs btnEdit" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Edit"><i class="fa fa-pencil"></i> </button>
-					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$this->encryption->encrypt($k['id_rs']).'" data-date="'.$k['tanggal'].'" title="Delete"><i class="fa fa-times"></i> </button>';
+					<button type="button" class="btn btn-xs btn-danger btnDelete" data-id="'.$k['id_rs'].'" data-date="'.$k['tanggal'].'" title="Delete"><i class="fa fa-times"></i> </button>';
 					$data[] = $row;
 				}
 
@@ -164,7 +164,7 @@ class Rs_kamar extends SLP_Controller {
 		} else {
 			$session  		= $this->app_loader->current_account();
 			$csrfHash 		= $this->security->get_csrf_hash();
-			$rs_id 			= escape($this->input->post('rsId', TRUE));
+			$rs_id 			= $this->input->post('rsId', TRUE);
 			if(!empty($session) AND !empty($rs_id)) {
 				$data = $this->mRsKamar->deleteData();
 				if($data['message'] == 'ERROR') {

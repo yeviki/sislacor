@@ -41,7 +41,7 @@ class Spesimen_sample extends SLP_Controller {
 					$no++;
 					$row = array();
 					$row[] = $no;
-							$row[] = $dl['tanggal_spesimen'];
+							$row[] = tgl_indo($dl['tanggal_spesimen']);
 							$row[] = regency($dl['regency_id']);
 							$row[] = $dl['total_spesimen'];
 							$row[] = $dl['total_pemeriksaan'];

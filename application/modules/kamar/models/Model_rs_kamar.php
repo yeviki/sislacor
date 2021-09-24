@@ -198,13 +198,12 @@ class Model_rs_kamar extends CI_Model
 
 	public function deleteData()
 	{
-		$id_rs_kamar	= $this->encryption->decrypt(escape($this->input->post('rsId', TRUE)));
+		$id_rs_kamar	= $this->input->post('rsId', TRUE);
 		$tanggal		= $this->input->post('publishDate', TRUE);
-		foreach ($id_rs_kamar as $id) {
-			$this->db->where('id_rs', $id);
-			$this->db->where('tanggal', $tanggal);
-			$this->db->delete('ta_rs_kamar');
-		}
+		// die($id_rs_kamar);
+		$this->db->where('id_rs', $id);
+		$this->db->where('tanggal', $tanggal);
+		$this->db->delete('ta_rs_kamar');
 		return array('message'=>'SUCCESS');
 		
 	}
