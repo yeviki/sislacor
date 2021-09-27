@@ -488,7 +488,8 @@ $config['csrf_exclude_uris'] = array( 'manajemen/users/listview','otg/listview',
                                       'oksigen/pemakaian-tabung/listview',
                                       'oksigen/pemakaian-tabung/details',
                                       'kasus/pendataan/listview',
-                                      'pengujian/spesimen-sample/listview'
+                                      'pengujian/spesimen-sample/listview',
+                                      'master/pemasok/listview'
                                     );
 /*
 |--------------------------------------------------------------------------
