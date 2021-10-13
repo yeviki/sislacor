@@ -352,6 +352,19 @@ class Model_master extends CI_Model
     return $dd_kamar;
   }
 
+  public function getDataKatDosis()
+  {
+		$this->db->order_by('id_kat_dosis ASC');
+		$query = $this->db->get('ref_kat_dosis');
+    $dd_vaksin[''] = 'Pilih Dosis';
+    if ($query->num_rows() > 0) {
+      foreach ($query->result_array() as $row) {
+        $dd_vaksin[$row['id_kat_dosis']] = $row['nm_dosis'];
+      }
+    }
+    return $dd_vaksin;
+  }
+
 }
 
 // This is the end of auth signin model
