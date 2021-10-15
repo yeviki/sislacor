@@ -1,7 +1,7 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
 /**
- * Description of model suplai capaian vaksin
+ * Description of model suplai capaian vaksinasi
  *
  * @author Yogi "solop" Kaputra
  */
@@ -17,7 +17,7 @@ class Model_capaian_vaksinasi extends CI_Model
 	public function validasiDataValue()
 	{
 		$this->form_validation->set_rules('total_vaksinasi', 'Total Stok', 'required|trim');
-		$this->form_validation->set_rules('tanggal_capaian', 'Tanggal Capaian Vaksin', 'required|trim');
+		$this->form_validation->set_rules('tanggal_vaksinasi', 'Tanggal Capaian Vaksin', 'required|trim');
   		validation_message_setting();
 		if ($this->form_validation->run() == FALSE)
 			return false;
@@ -25,7 +25,7 @@ class Model_capaian_vaksinasi extends CI_Model
 			return true;
 	}
 
-	var $search = array('tanggal_capaian');
+	var $search = array('tanggal_vaksinasi', 'id_kat_dosis', 'id_regency');
 	public function get_datatables($param)
 	{
 		$this->_get_datatables_query($param);
@@ -44,28 +44,23 @@ class Model_capaian_vaksinasi extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select('a.id_capaian_vaksin,
+		$this->db->select('a.id_capaian_vaksinasi,
 								a.total_vaksinasi,
-								a.id_suplai_vaksin,
-								a.tanggal_capaian,
+								a.id_kat_dosis,
+								a.regency_id,
+								a.tanggal_vaksinasi,
 								a.create_by,
 								a.create_date,
 								a.create_ip,
 								a.mod_by,
 								a.mod_date,
 								a.mod_ip,
-								b.total_suplai,
-								b.id_jenis_vaksin,
-								b.id_penyalur,
-								b.regency_id,
-								c.nm_vaksin,
-								d.nm_penyalur,
-                                e.regency_id
+                                b.nm_dosis,
+                                c.name
 								');
-		$this->db->join('ta_suplai_vaksin b', 'a.id_suplai_vaksin = b.id_suplai_vaksin', 'inner');
-		$this->db->join('ref_jenis_vaksin c', 'b.id_jenis_vaksin = c.id_jenis_vaksin', 'inner');
-		$this->db->join('ref_penyalur d', 'b.id_penyalur = d.id_penyalur', 'inner');
-		return $this->db->count_all_results('ta_capaian_vaksin a');
+		$this->db->join('ref_kat_dosis b', 'a.id_kat_dosis = b.id_kat_dosis', 'inner');
+		$this->db->join('wa_regency c', 'c.id = a.regency_id', 'inner');
+		return $this->db->count_all_results('ta_capaian_vaksinasi a');
 	}
 
 	private function _get_datatables_query($param)
@@ -76,37 +71,33 @@ class Model_capaian_vaksinasi extends CI_Model
 				$post[$v['name']] = $v['value'];
 			}
 		}
-		$this->db->select('a.id_capaian_vaksin,
+		$this->db->select('a.id_capaian_vaksinasi,
 								a.total_vaksinasi,
-								a.id_suplai_vaksin,
-								a.tanggal_capaian,
+								a.id_kat_dosis,
+								a.regency_id,
+								a.tanggal_vaksinasi,
 								a.create_by,
 								a.create_date,
 								a.create_ip,
 								a.mod_by,
 								a.mod_date,
 								a.mod_ip,
-								b.total_suplai,
-								b.id_jenis_vaksin,
-								b.id_penyalur,
-								b.regency_id,
-								c.nm_vaksin,
-								d.nm_penyalur
+                                b.nm_dosis,
+                                c.name
 								');
-		$this->db->from('ta_capaian_vaksin a');
-		$this->db->join('ta_suplai_vaksin b', 'a.id_suplai_vaksin = b.id_suplai_vaksin', 'inner');
-		$this->db->join('ref_jenis_vaksin c', 'b.id_jenis_vaksin = c.id_jenis_vaksin', 'inner');
-		$this->db->join('ref_penyalur d', 'b.id_penyalur = d.id_penyalur', 'inner');
+		$this->db->from('ta_capaian_vaksinasi a');
+		$this->db->join('ref_kat_dosis b', 'a.id_kat_dosis = b.id_kat_dosis', 'inner');
+		$this->db->join('wa_regency c', 'c.id = a.regency_id', 'inner');
 		
-		// Penyalur Vaksin
-		if(isset($post['penyalur']) AND $post['penyalur'] != '')
-			$this->db->where('b.id_penyalur', $post['penyalur']);
-		// Jenis Vaksin
-		if(isset($post['jenis_vaksin']) AND $post['jenis_vaksin'] != '')
-			$this->db->where('b.id_suplai_vaksin', $post['jenis_vaksin']);
-		// tanggal_capaian Masuk
-        if(isset($post['tanggal_capaian']) AND $post['tanggal_capaian'] != ''){
-			$this->db->where('DATE_FORMAT(a.tanggal_capaian, "%m/%d/%Y")', $post['tanggal_capaian']);
+		// Regency
+		if(isset($post['id_regency']) AND $post['id_regency'] != '')
+			$this->db->where('a.regency_id', $post['id_regency']);
+		// Jenis Dosis
+		if(isset($post['id_kat_dosis']) AND $post['id_kat_dosis'] != '')
+			$this->db->where('a.id_kat_dosis', $post['id_kat_dosis']);
+		// Tanggal vaksinasi
+        if(isset($post['tanggal']) AND $post['tanggal'] != ''){
+			$this->db->where('DATE_FORMAT(a.tanggal_vaksinasi, "%m/%d/%Y")', $post['tanggal']);
 		}
 		
 		$i = 0;
@@ -124,14 +115,31 @@ class Model_capaian_vaksinasi extends CI_Model
 			}
 		$i++;
 		}
-		$this->db->order_by('a.tanggal_capaian DESC');
-		$this->db->order_by('a.id_capaian_vaksin DESC');
+		$this->db->order_by('a.tanggal_vaksinasi DESC');
+		$this->db->order_by('a.id_capaian_vaksinasi DESC');
   	}
 
-	public function getDataDetail($id_capaian_vaksin)
+	public function getDataDetail($id_capaian_vaksinasi)
 	{
-		$this->db->where('id_capaian_vaksin', $id_capaian_vaksin);
-		$query = $this->db->get('ta_capaian_vaksin');
+		$this->db->select('a.id_capaian_vaksinasi,
+								a.total_vaksinasi,
+								a.id_kat_dosis,
+								a.regency_id,
+								a.tanggal_vaksinasi,
+								a.create_by,
+								a.create_date,
+								a.create_ip,
+								a.mod_by,
+								a.mod_date,
+								a.mod_ip,
+                                b.nm_dosis,
+                                c.name
+								');
+		$this->db->from('ta_capaian_vaksinasi a');
+		$this->db->join('ref_kat_dosis b', 'a.id_kat_dosis = b.id_kat_dosis', 'inner');
+		$this->db->join('wa_regency c', 'c.id = a.regency_id', 'inner');
+		$this->db->where('a.id_capaian_vaksinasi', $id_capaian_vaksinasi);
+		$query = $this->db->get();
 		return $query->row_array();
 	}
 
@@ -142,12 +150,13 @@ class Model_capaian_vaksinasi extends CI_Model
 		$create_time_now 	= gmdate('H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
 
-		$tanggal_capaian	= date_convert(escape($this->input->post('tanggal_capaian', TRUE)));
+		$tanggal_vaksinasi	= date_convert(escape($this->input->post('tanggal_vaksinasi', TRUE)));
 
 			$data = array(
-				'tanggal_capaian'	=> $tanggal_capaian,
+				'tanggal_vaksinasi'	=> $tanggal_vaksinasi,
 				'total_vaksinasi'	=> escape($this->input->post('total_vaksinasi', TRUE)),
-				'id_suplai_vaksin'	=> escape($this->input->post('suplai_vaksin', TRUE)),
+				'regency_id'		=> escape($this->input->post('kabkota', TRUE)),
+				'id_kat_dosis'		=> escape($this->input->post('dosis', TRUE)),
 				'create_by'			=> $create_by,
 				'create_date'		=> $create_date,
 				'create_ip'			=> $create_ip,
@@ -155,8 +164,8 @@ class Model_capaian_vaksinasi extends CI_Model
 				'mod_date'			=> $create_date,
 				'mod_ip'			=> $create_ip
 			);
-			$this->db->insert('ta_capaian_vaksin', $data);
-			return array('message'=>'SUCCESS', 'tanggal_capaian'=>$tanggal_capaian);
+			$this->db->insert('ta_capaian_vaksinasi', $data);
+			return array('message'=>'SUCCESS', 'tanggal_vaksinasi'=>$tanggal_vaksinasi);
 	}
 
 	public function updateData()
@@ -164,32 +173,33 @@ class Model_capaian_vaksinasi extends CI_Model
 		$create_by    		= $this->app_loader->current_account();
 		$create_date 		= gmdate('Y-m-d H:i:s', time()+60*60*7);
 		$create_ip    		= $this->input->ip_address();
-		$id_capaian_vaksin	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$id_capaian_vaksinasi	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
 		//cek data
-		$dataVaksin 	    = $this->getDataDetail($id_capaian_vaksin);
-		$tanggal_capaian  	= !empty($dataVaksin) ? $dataVaksin['tanggal_capaian'] : '';
+		$dataVaksin 	    = $this->getDataDetail($id_capaian_vaksinasi);
+		$tanggal_vaksinasi  	= !empty($dataVaksin) ? $dataVaksin['tanggal_vaksinasi'] : '';
 		if(count($dataVaksin) <= 0)
-			return array('message'=>'ERROR', 'tanggal_capaian'=>$tanggal_capaian);
+			return array('message'=>'ERROR', 'tanggal_vaksinasi'=>$tanggal_vaksinasi);
 		else {
 				$data = array(
-					'tanggal_capaian'	=> date_convert(escape($this->input->post('tanggal_capaian', TRUE))),
+					'tanggal_vaksinasi'	=> date_convert(escape($this->input->post('tanggal_vaksinasi', TRUE))),
 					'total_vaksinasi'	=> escape($this->input->post('total_vaksinasi', TRUE)),
-					'id_suplai_vaksin'	=> escape($this->input->post('suplai_vaksin', TRUE)),
+					'regency_id'		=> escape($this->input->post('kabkota', TRUE)),
+					'id_kat_dosis'		=> escape($this->input->post('dosis', TRUE)),
 					'mod_by'			=> $create_by,
 					'mod_date'			=> $create_date,
 					'mod_ip'			=> $create_ip
 				);
-			$this->db->where('id_capaian_vaksin', $id_capaian_vaksin);
-			$this->db->update('ta_capaian_vaksin', $data);
-			return array('message'=>'SUCCESS', 'tanggal_capaian'=>$tanggal_capaian);
+			$this->db->where('id_capaian_vaksinasi', $id_capaian_vaksinasi);
+			$this->db->update('ta_capaian_vaksinasi', $data);
+			return array('message'=>'SUCCESS', 'tanggal_vaksinasi'=>$tanggal_vaksinasi);
 		}
 	}
 
 	public function deleteData()
 	{
-		$id_capaian_vaksin	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
-		$this->db->where('id_capaian_vaksin', $id_capaian_vaksin);
-		$this->db->delete('ta_capaian_vaksin');
+		$id_capaian_vaksinasi	= $this->encryption->decrypt(escape($this->input->post('vaksinId', TRUE)));
+		$this->db->where('id_capaian_vaksinasi', $id_capaian_vaksinasi);
+		$this->db->delete('ta_capaian_vaksinasi');
 		return array('message'=>'SUCCESS');
 		
 	}

@@ -99,8 +99,10 @@ class Capaian_vaksinasi extends SLP_Controller {
 			if(!empty($id_capaian_vaksinasi) AND !empty($session)) {
 				$data = $this->mCapaianVaksinasi->getDataDetail($this->encryption->decrypt($id_capaian_vaksinasi));
 				$row = array();
-				$row['id_suplai_vaksin']	=	!empty($data) ? $data['id_suplai_vaksin'] : '';
-				$row['total_vaksinasi']		=	!empty($data) ? $data['total_vaksinasi'] : '';
+				$row['id_capaian_vaksinasi']	=	!empty($data) ? $data['id_capaian_vaksinasi'] : '';
+				$row['total_vaksinasi']			=	!empty($data) ? $data['total_vaksinasi'] : '';
+				$row['id_kat_dosis']			=	!empty($data) ? $data['id_kat_dosis'] : '';
+				$row['regency_id']				=	!empty($data) ? $data['regency_id'] : '';
 				$row['tanggal_vaksinasi']		= 	!empty($data) ? date('d/m/Y', strtotime($data['tanggal_vaksinasi'])) : '';
 
 				$result = array('status' => 1, 'message' => $row, 'csrfHash' => $csrfHash);

@@ -43,21 +43,21 @@
           <?php echo form_open(site_url('#'), array('id'=>'formFilter', 'style'=>'display:none;margin-bottom:20px;')); ?>
             <div style="display:block;background:#FFF;padding:20px;border:1px solid #CCC;box-shadow:0px 0px 10px #CCC;">
               <div class="row">
-                <div class="col-xs-12 col-sm-3">
+                <div class="col-xs-12 col-sm-4">
                   <div class="form-group required">
-                    <label for="penyalur" class="control-label"><b>Nama Penyalur <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('penyalur', $list_penyalur, $this->input->post('penyalur'), 'class="select-all"');?>
+                    <label for="id_regency" class="control-label"><b>Kab/Kota <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('id_regency', $list_kabkota, $this->input->post('id_regency'), 'class="select-all" id="id_regency"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
-                <div class="col-xs-12 col-sm-3">
+                <div class="col-xs-12 col-sm-4">
                   <div class="form-group required">
-                    <label for="suplai_vaksin" class="control-label"><b>Jenis Vaksin <font color="red" size="1em">(*)</font></b></label>
-                    <?php echo form_dropdown('suplai_vaksin', $list_suplai_vaksin, $this->input->post('suplai_vaksin'), 'class="select-all"');?>
+                    <label for="id_kat_dosis" class="control-label"><b>Dosis <font color="red" size="1em">(*)</font></b></label>
+                    <?php echo form_dropdown('id_kat_dosis', $list_dosis, $this->input->post('id_kat_dosis'), 'class="select-all" id="id_kat_dosis"');?>
                     <div class="help-block"></div>
                   </div>
                 </div>
-                <div class="col-xs-12 col-sm-3">
+                <div class="col-xs-12 col-sm-4">
                     <div class="form-group">
                         <label for="tanggal" class="control-label"><b>Pilih Tanggal <font color="red" size="1em">(*)</font></b></label>
                         <div class="input-group date datemonth">
@@ -362,9 +362,6 @@
                                         '</div>');
                   $('#modalEntryForm').modal('toggle');
                   getDataList();
-                  setTimeout(function(){
-                    window.location.reload(1);
-                  }, 1000);
                 }
                 $('#frmEntry').waitMe('hide');
               }).fail(function() {
@@ -477,56 +474,6 @@
       }
     });
   });
-
-  $(document).on('click', '.btnUpload', function(e){
-    $('#formupload').slideToggle('slow');
-    $('.select-all').select2('val', '');
-  });
-
-  $(document).on('click', '.download', function(e){
-        url = site + '/repository/template/import_data_capaian_vaksin.xlsx';
-        window.location.href = url;
-  });
-
-  $(document).on('submit', '#formupload', function(e) {
-        e.preventDefault();
-        const file = $('#file').prop('files')[0];
-        var token = $('input[name="' + csrfName + '"]').val()
-        let form_data = new FormData();
-        form_data.append('file', file);
-        form_data.append('<?php echo $this->security->get_csrf_token_name() ?>', token);
-
-        $.ajax({
-            url: site + 'vaksinasi/capaian-vaksinasi/upload',
-            type: 'post',
-            data: form_data,
-            //untuk input data dengan gambar jangan lupaa proces data dan content type
-            processData: false,
-            contentType: false,
-        }).done(function(res) {
-            console.log(res)
-            $('input[name="' + csrfName + '"]').val(res.csrfHash);
-            // console.log(res)
-            getDataList();
-            alert(res.message)
-            $('#file').val('')
-        }).fail(function(e) {
-            // console.log(e)
-        })
-  })
-
-  $('#file').change(function(event) {
-      let type = event.target.files[0].type
-      let _size = event.target.files[0].size;
-      if (type != 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-          alert('File Bukan Excel')
-          $('#file').val('')
-      }
-      if (_size >= 1555555) {
-          alert(`File Terlalu Besar, Max 1.55 MB `)
-          $('#file').val('')
-      }
-  })
 
   $(document).on('keypress keyup', '.nominal',function (e) {
     if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
