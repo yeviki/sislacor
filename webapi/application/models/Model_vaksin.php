@@ -150,6 +150,34 @@ class Model_vaksin extends CI_Model
 		return $query->result_array();
 	}
 
+	public function get_VaksinasiKabKota($id)
+	{
+        $date  = gmdate('Y-m-d');
+		$this->db->select('a.id_capaian_vaksinasi,
+                            a.id_kat_dosis,
+                            a.total_vaksinasi,
+                            a.regency_id,
+                            a.tanggal_vaksinasi,
+							SUM(a.total_vaksinasi) AS total_vaksinasi_kab,
+							b.name,
+							c.nm_dosis
+                            ');
+		$this->db->from('ta_capaian_vaksinasi a');
+		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
+		$this->db->join('ref_kat_dosis c', 'a.id_kat_dosis = c.id_kat_dosis', 'inner');
+		$this->db->where('a.regency_id', $id);
+        $this->db->group_by('a.regency_id');
+		$query = $this->db->get();
+		return $query->row_array();
+	}
+
+	public function get_totVaksinasiPerDosis($id)
+	{
+		$query = $this->db->query('select b.id, ifnull((select x.total_vaksinasi from ta_capaian_vaksinasi x where x.id_kat_dosis=c.id_kat_dosis and x.regency_id=b.id),0) as total_dosis, c.nm_dosis from ref_kat_dosis c, wa_regency b, ta_capaian_vaksinasi a where b.province_id=13 and b.id="'.$id.'"
+		GROUP by b.id, c.id_kat_dosis');
+		return $query->result_array();
+	}
+
 }
 
 // This is the end of auth signin model

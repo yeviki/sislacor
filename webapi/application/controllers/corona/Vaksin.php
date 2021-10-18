@@ -119,6 +119,48 @@ class Vaksin extends REST_Controller {
             'result' => 'No data were found'
             ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
         }
+    }
+    
+
+    public function totcapaianvaksinasikabkota_get()
+	{ 
+        //get data kabupaten/kota
+        $dataKabKotaVaksinasi    = array();
+        $vaksinasiKabKota    = array();
+        $totVaksin      = array();
+        $dataShow = $this->mVaksin->get_KabKota();
+        foreach ($dataShow as $key => $r) {
+            $totVaksin      = array();
+            $row['id_regency']              = $r['id'];
+            $row['kabkota']                 = $r['name'];
+
+            $dataAll = $this->mVaksin->get_VaksinasiKabKota($r['id']);
+            $vaksinasiKabKota['total_vaksinasi_kab']   = !empty($dataAll) ? $dataAll['total_vaksinasi_kab'] : '0';
+
+            $dataDosis = $this->mVaksin->get_totVaksinasiPerDosis($r['id']);
+            foreach($dataDosis as $show => $key ) {
+                $totVaksin[$show]['nm_dosis']          = !empty($key) ? $key['nm_dosis'] : '0';
+                $totVaksin[$show]['total_dosis']       = !empty($key) ? $key['total_dosis'] : '0';
+                
+            }
+
+            $row['data_vaksinasi_kabkota']  = $vaksinasiKabKota;
+            $row['data_dosis_vaksinasi']    = $totVaksin;
+            unset($totVaksin);
+            $dataKabKotaVaksinasi[]         = $row;
+        }
+
+        if(count($dataShow) > 0) {
+            $this->response([
+            'response' => 'RC200',
+            'result' => $dataKabKotaVaksinasi
+            ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
+        } else {
+            $this->response([
+            'response' => 'RC404',
+            'result' => 'No data were found'
+            ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
+        }
 	}
 
 }
