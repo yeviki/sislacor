@@ -178,6 +178,24 @@ class Model_vaksin extends CI_Model
 		return $query->result_array();
 	}
 
+	public function get_sasaranKabKota($id)
+	{
+        $date  = gmdate('Y-m-d');
+		$this->db->select('a.id_sasaran,
+                            a.total_sasaran,
+                            a.regency_id,
+                            a.tahun,
+							SUM(a.total_sasaran) AS total_sasaran_kab,
+							b.name
+                            ');
+		$this->db->from('ta_sasaran a');
+		$this->db->join('wa_regency b', 'a.regency_id = b.id', 'inner');
+		$this->db->where('a.regency_id', $id);
+        $this->db->group_by('a.regency_id');
+		$query = $this->db->get();
+		return $query->row_array();
+	}
+
 }
 
 // This is the end of auth signin model

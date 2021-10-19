@@ -134,8 +134,11 @@ class Vaksin extends REST_Controller {
             $row['id_regency']              = $r['id'];
             $row['kabkota']                 = $r['name'];
 
-            $dataAll = $this->mVaksin->get_VaksinasiKabKota($r['id']);
-            $vaksinasiKabKota['total_vaksinasi_kab']   = !empty($dataAll) ? $dataAll['total_vaksinasi_kab'] : '0';
+            $dataVaksinasi = $this->mVaksin->get_VaksinasiKabKota($r['id']);
+            $vaksinasiKabKota['total_vaksinasi_kab']   = !empty($dataVaksinasi) ? $dataVaksinasi['total_vaksinasi_kab'] : '0';
+
+            $dataSasaran = $this->mVaksin->get_sasaranKabKota($r['id']);
+            $sasaranKabKota['total_sasaran_kab']   = !empty($dataSasaran) ? $dataSasaran['total_sasaran_kab'] : '0';
 
             $dataDosis = $this->mVaksin->get_totVaksinasiPerDosis($r['id']);
             foreach($dataDosis as $show => $key ) {
@@ -145,6 +148,7 @@ class Vaksin extends REST_Controller {
             }
 
             $row['data_vaksinasi_kabkota']  = $vaksinasiKabKota;
+            $row['data_sasaran_kabkota']  = $sasaranKabKota;
             $row['data_dosis_vaksinasi']    = $totVaksin;
             unset($totVaksin);
             $dataKabKotaVaksinasi[]         = $row;
